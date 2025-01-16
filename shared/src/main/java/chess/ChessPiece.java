@@ -48,16 +48,16 @@ public class ChessPiece {
         return type;
     }
 
-    private Collection<ChessMove> bishopSubsetMoves(ChessBoard board, ChessPosition myPosition, boolean right,
-                                                    boolean down) {
+    private Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition myPosition, boolean down,
+                                                boolean right) {
         int checkRow = myPosition.getRow();
         int checkCol = myPosition.getColumn();
-        Set<ChessMove> bishopMoves = new HashSet<>();
+        Collection<ChessMove> bishopMoves = new HashSet<>();
         ChessPiece checkPiece;
-        while (((!right && checkRow > BOARD_LOWER_LIMIT) || (right && checkRow < BOARD_UPPER_LIMIT)) &&
-                ((!down && checkCol > BOARD_LOWER_LIMIT) || (down && checkCol < BOARD_UPPER_LIMIT))) {
-            checkRow = right ? checkRow + 1: checkRow - 1;
-            checkCol = down ?  checkCol + 1: checkCol - 1;
+        while (((!down && checkRow > BOARD_LOWER_LIMIT) || (down && checkRow < BOARD_UPPER_LIMIT)) &&
+                ((!right && checkCol > BOARD_LOWER_LIMIT) || (right && checkCol < BOARD_UPPER_LIMIT))) {
+            checkRow = down ? checkRow + 1: checkRow - 1;
+            checkCol = right ?  checkCol + 1: checkCol - 1;
             ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
             checkPiece = board.getPiece(checkPosition);
             if (checkPiece == null) {
@@ -75,12 +75,53 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
-        Set<ChessMove> bishopMoves = new HashSet<>();
-        bishopMoves.addAll(bishopSubsetMoves(board, myPosition, false, false));
-        bishopMoves.addAll(bishopSubsetMoves(board, myPosition, true, false));
-        bishopMoves.addAll(bishopSubsetMoves(board, myPosition, false, true));
-        bishopMoves.addAll(bishopSubsetMoves(board, myPosition, true, true));
+        Collection<ChessMove> bishopMoves = new HashSet<>();
+        bishopMoves.addAll(diagonalMoves(board, myPosition, false, false));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, true, false));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, false, true));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, true, true));
         return bishopMoves;
+    }
+
+    private Collection<ChessMove> horizontalVerticalMoves(ChessBoard board, ChessPosition myPosition, boolean vertical,
+                                                          boolean downRight) {
+        int checkRow = myPosition.getRow();
+        int checkCol = myPosition.getColumn();
+        Collection<ChessMove> horizontalVerticalMoves = new HashSet<>();
+        ChessPiece checkPiece;
+        while ((vertical && downRight && checkRow < BOARD_UPPER_LIMIT) ||
+                (vertical && !downRight && checkRow > BOARD_LOWER_LIMIT) ||
+                (!vertical && downRight && checkCol < BOARD_UPPER_LIMIT) ||
+                (!vertical && !downRight && checkCol > BOARD_LOWER_LIMIT)) {
+            if (vertical) {
+                checkRow = downRight ? checkRow + 1: checkRow - 1;
+            }
+            else {
+                checkCol = downRight ?  checkCol + 1: checkCol - 1;
+            }
+            ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
+            checkPiece = board.getPiece(checkPosition);
+            if (checkPiece == null) {
+                horizontalVerticalMoves.add(new ChessMove(myPosition, checkPosition, null));
+            }
+            else if (checkPiece.getTeamColor() == pieceColor) {
+                break;
+            }
+            else {
+                horizontalVerticalMoves.add(new ChessMove(myPosition, checkPosition, null));
+                break;
+            }
+        }
+        return horizontalVerticalMoves;
+    }
+
+    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> rookMoves = new HashSet<>();
+        rookMoves.addAll(horizontalVerticalMoves(board, myPosition, true, false));
+        rookMoves.addAll(horizontalVerticalMoves(board, myPosition, false, true));
+        rookMoves.addAll(horizontalVerticalMoves(board, myPosition, true, true));
+        rookMoves.addAll(horizontalVerticalMoves(board, myPosition, false, false));
+        return rookMoves;
     }
 
     /**
@@ -93,6 +134,9 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.BISHOP) {
             return bishopMoves(board, myPosition);
+        }
+        else if (type == PieceType.ROOK) {
+            return rookMoves(board, myPosition);
         }
         else {
             throw new RuntimeException("Not implemented");
