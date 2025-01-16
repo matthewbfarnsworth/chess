@@ -74,15 +74,6 @@ public class ChessPiece {
         return bishopMoves;
     }
 
-    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> bishopMoves = new HashSet<>();
-        bishopMoves.addAll(diagonalMoves(board, myPosition, false, false));
-        bishopMoves.addAll(diagonalMoves(board, myPosition, true, false));
-        bishopMoves.addAll(diagonalMoves(board, myPosition, false, true));
-        bishopMoves.addAll(diagonalMoves(board, myPosition, true, true));
-        return bishopMoves;
-    }
-
     private Collection<ChessMove> horizontalVerticalMoves(ChessBoard board, ChessPosition myPosition, boolean vertical,
                                                           boolean downRight) {
         int checkRow = myPosition.getRow();
@@ -115,6 +106,28 @@ public class ChessPiece {
         return horizontalVerticalMoves;
     }
 
+    private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> bishopMoves = new HashSet<>();
+        bishopMoves.addAll(diagonalMoves(board, myPosition, false, false));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, true, false));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, false, true));
+        bishopMoves.addAll(diagonalMoves(board, myPosition, true, true));
+        return bishopMoves;
+    }
+
+    private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> queenMoves = new HashSet<>();
+        queenMoves.addAll(diagonalMoves(board, myPosition, false, false));
+        queenMoves.addAll(horizontalVerticalMoves(board, myPosition, true, false));
+        queenMoves.addAll(diagonalMoves(board, myPosition, true, false));
+        queenMoves.addAll(horizontalVerticalMoves(board, myPosition, false, true));
+        queenMoves.addAll(diagonalMoves(board, myPosition, false, true));
+        queenMoves.addAll(horizontalVerticalMoves(board, myPosition, true, true));
+        queenMoves.addAll(diagonalMoves(board, myPosition, true, true));
+        queenMoves.addAll(horizontalVerticalMoves(board, myPosition, false, false));
+        return queenMoves;
+    }
+
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> rookMoves = new HashSet<>();
         rookMoves.addAll(horizontalVerticalMoves(board, myPosition, true, false));
@@ -134,6 +147,9 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.BISHOP) {
             return bishopMoves(board, myPosition);
+        }
+        if (type == PieceType.QUEEN) {
+            return queenMoves(board, myPosition);
         }
         else if (type == PieceType.ROOK) {
             return rookMoves(board, myPosition);
