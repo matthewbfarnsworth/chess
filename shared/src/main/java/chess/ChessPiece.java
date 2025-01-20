@@ -55,6 +55,7 @@ public class ChessPiece {
         return switch (type) {
             case BISHOP -> new BishopMovesCalculator().pieceMoves(board, myPosition);
             case KING -> new KingMovesCalculator().pieceMoves(board, myPosition);
+            case KNIGHT -> new KnightMovesCalculator().pieceMoves(board, myPosition);
             case QUEEN -> new QueenMovesCalculator().pieceMoves(board, myPosition);
             case ROOK -> new RookMovesCalculator().pieceMoves(board, myPosition);
             default -> throw new RuntimeException("Not implemented");
