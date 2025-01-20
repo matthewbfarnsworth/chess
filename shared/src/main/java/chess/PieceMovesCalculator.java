@@ -9,6 +9,13 @@ public interface PieceMovesCalculator {
 
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
 
+    static boolean withinBounds(ChessPosition checkPosition) {
+        int checkRow = checkPosition.getRow();
+        int checkCol = checkPosition.getColumn();
+        return checkRow >= BOARD_LOWER_LIMIT && checkRow <= BOARD_UPPER_LIMIT &&
+                checkCol >= BOARD_LOWER_LIMIT && checkCol <= BOARD_UPPER_LIMIT;
+    }
+
     static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition myPosition, boolean down,
                                                 boolean right) {
         int checkRow = myPosition.getRow();

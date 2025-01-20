@@ -14,11 +14,10 @@ public class KingMovesCalculator implements PieceMovesCalculator {
         for (int i = 0; i < MAX_KING_MOVES; i++) {
             int checkRow = myPosition.getRow() + kingMovesRowOffsets[i];
             int checkCol = myPosition.getColumn() + kingMovesColOffsets[i];
-            if (checkRow >= BOARD_LOWER_LIMIT && checkRow <= BOARD_UPPER_LIMIT &&
-                    checkCol >= BOARD_LOWER_LIMIT && checkCol <= BOARD_UPPER_LIMIT) {
+            ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
+            if (PieceMovesCalculator.withinBounds(checkPosition)) {
                 ChessPiece checkPiece = board.getPiece(new ChessPosition(checkRow, checkCol));
                 if (checkPiece == null || checkPiece.getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
-                    ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
                     kingMoves.add(new ChessMove(myPosition, checkPosition, null));
                 }
             }
