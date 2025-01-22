@@ -52,14 +52,15 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return switch (type) {
-            case BISHOP -> new BishopMovesCalculator().pieceMoves(board, myPosition);
-            case KING -> new KingMovesCalculator().pieceMoves(board, myPosition);
-            case KNIGHT -> new KnightMovesCalculator().pieceMoves(board, myPosition);
-            case PAWN -> new PawnMovesCalculator().pieceMoves(board, myPosition);
-            case QUEEN -> new QueenMovesCalculator().pieceMoves(board, myPosition);
-            case ROOK -> new RookMovesCalculator().pieceMoves(board, myPosition);
+        PieceMovesCalculator movesCalculator = switch (type) {
+            case BISHOP -> new BishopMovesCalculator();
+            case KING -> new KingMovesCalculator();
+            case KNIGHT -> new KnightMovesCalculator();
+            case PAWN -> new PawnMovesCalculator();
+            case QUEEN -> new QueenMovesCalculator();
+            case ROOK -> new RookMovesCalculator();
         };
+        return movesCalculator.pieceMoves(board, myPosition);
     }
 
     @Override
