@@ -24,23 +24,19 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         int checkRow = myPosition.getRow() + forwardRowOffset;
         int checkCol = myPosition.getColumn();
         ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
-        if (PieceMovesCalculator.withinBounds(checkPosition)) {
-            if (board.getPiece(checkPosition) == null) {
-                //Promote if at end of board
-                if (checkRow == BOARD_LOWER_LIMIT || checkRow == BOARD_UPPER_LIMIT) {
-                    pawnMoves.addAll(pawnPromotionMoves(myPosition, checkPosition));
-                }
-                else {
-                    pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
-                    //Double move start
-                    if (myPosition.getRow() == startingRow) {
-                        checkRow = myPosition.getRow() + forwardRowOffset * 2;
-                        checkPosition = new ChessPosition(checkRow, checkCol);
-                        if (PieceMovesCalculator.withinBounds(checkPosition)) {
-                            if (board.getPiece(checkPosition) == null) {
-                                pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
-                            }
-                        }
+        if (PieceMovesCalculator.withinBounds(checkPosition) && board.getPiece(checkPosition) == null) {
+            //Promote if at end of board
+            if (checkRow == BOARD_LOWER_LIMIT || checkRow == BOARD_UPPER_LIMIT) {
+                pawnMoves.addAll(pawnPromotionMoves(myPosition, checkPosition));
+            }
+            else {
+                pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
+                //Double move start
+                if (myPosition.getRow() == startingRow) {
+                    checkRow = myPosition.getRow() + forwardRowOffset * 2;
+                    checkPosition = new ChessPosition(checkRow, checkCol);
+                    if (PieceMovesCalculator.withinBounds(checkPosition) && board.getPiece(checkPosition) == null) {
+                        pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
                     }
                 }
             }

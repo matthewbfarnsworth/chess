@@ -6,7 +6,7 @@ import java.util.HashSet;
 public class KingMovesCalculator implements PieceMovesCalculator {
     int[] kingMovesRowOffsets = {-1, -1, -1, 0, 0, 1, 1, 1};
     int[] kingMovesColOffsets = {-1, 0, 1, -1, 1, -1, 0, 1};
-    int MAX_KING_MOVES = 8;
+    static int MAX_KING_MOVES = 8;
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
