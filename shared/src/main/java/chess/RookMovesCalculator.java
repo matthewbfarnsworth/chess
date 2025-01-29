@@ -1,16 +1,12 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashSet;
 
-public class RookMovesCalculator implements PieceMovesCalculator {
-    @Override
+public class RookMovesCalculator extends PieceMovesCalculator {
+    private final int[] rowDirections = new int[]{-1, 0, 1, 0};
+    private final int[] colDirections = new int[]{0, 1, 0, -1};
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> rookMoves = new HashSet<>();
-        rookMoves.addAll(PieceMovesCalculator.horizontalVerticalMoves(board, myPosition, true, false));
-        rookMoves.addAll(PieceMovesCalculator.horizontalVerticalMoves(board, myPosition, false, true));
-        rookMoves.addAll(PieceMovesCalculator.horizontalVerticalMoves(board, myPosition, true, true));
-        rookMoves.addAll(PieceMovesCalculator.horizontalVerticalMoves(board, myPosition, false, false));
-        return rookMoves;
+        return slideMoves(board, myPosition, rowDirections, colDirections);
     }
 }

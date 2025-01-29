@@ -1,16 +1,12 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashSet;
 
-public class BishopMovesCalculator implements PieceMovesCalculator {
-    @Override
+public class BishopMovesCalculator extends PieceMovesCalculator {
+    private final int[] rowDirections = new int[]{-1, -1, 1, 1};
+    private final int[] colDirections = new int[]{-1, 1, -1, 1};
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> bishopMoves = new HashSet<>();
-        bishopMoves.addAll(PieceMovesCalculator.diagonalMoves(board, myPosition, false, false));
-        bishopMoves.addAll(PieceMovesCalculator.diagonalMoves(board, myPosition, true, false));
-        bishopMoves.addAll(PieceMovesCalculator.diagonalMoves(board, myPosition, false, true));
-        bishopMoves.addAll(PieceMovesCalculator.diagonalMoves(board, myPosition, true, true));
-        return bishopMoves;
+        return slideMoves(board, myPosition, rowDirections, colDirections);
     }
 }

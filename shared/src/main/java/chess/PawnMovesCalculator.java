@@ -3,61 +3,62 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class PawnMovesCalculator implements PieceMovesCalculator {
-    private Collection<ChessMove> pawnPromotionMoves(ChessPosition startPosition, ChessPosition endPosition) {
-        Collection<ChessMove> pawnPromotionMoves = new HashSet<>();
-        pawnPromotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
-        pawnPromotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-        pawnPromotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
-        pawnPromotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
-        return pawnPromotionMoves;
+public class PawnMovesCalculator extends PieceMovesCalculator {
+
+    private Collection<ChessMove> promotionMoves(ChessPosition startPosition, ChessPosition endPosition) {
+        Collection<ChessMove> promotionMoves = new HashSet<>();
+        promotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
+        promotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
+        promotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
+        promotionMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
+        return promotionMoves;
     }
 
-    @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> pawnMoves = new HashSet<>();
-        ChessGame.TeamColor teamColor = board.getPiece(myPosition).getTeamColor();
-        int forwardRowOffset = teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
-        int startingRow = teamColor == ChessGame.TeamColor.WHITE ? 2 : 7;
+        int checkRow;
+        int checkCol;
+        ChessPosition checkPosition;
+        ChessGame.TeamColor pieceColor = board.getPiece(myPosition).getTeamColor();
+        int rowForward = pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+        int startRow = pieceColor == ChessGame.TeamColor.WHITE ? 2 : BOARD_UPPER_LIMIT - 1;
+        int promotionRow = pieceColor == ChessGame.TeamColor.WHITE ? BOARD_UPPER_LIMIT : BOARD_LOWER_LIMIT;
+        Collection<ChessMove> pieceMoves = new HashSet<>();
 
-        //Forward move
-        int checkRow = myPosition.getRow() + forwardRowOffset;
-        int checkCol = myPosition.getColumn();
-        ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
-        if (PieceMovesCalculator.withinBounds(checkPosition) && board.getPiece(checkPosition) == null) {
-            //Promote if at end of board
-            if (checkRow == BOARD_LOWER_LIMIT || checkRow == BOARD_UPPER_LIMIT) {
-                pawnMoves.addAll(pawnPromotionMoves(myPosition, checkPosition));
-            }
-            else {
-                pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
-                //Double move start
-                if (myPosition.getRow() == startingRow) {
-                    checkRow = myPosition.getRow() + forwardRowOffset * 2;
-                    checkPosition = new ChessPosition(checkRow, checkCol);
-                    if (PieceMovesCalculator.withinBounds(checkPosition) && board.getPiece(checkPosition) == null) {
-                        pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
-                    }
-                }
-            }
-        }
-        //Capture
-        checkRow = myPosition.getRow() + forwardRowOffset;
-        for (int colOffset = -1; colOffset <= 1; colOffset += 2) {
+        for (int colOffset = -1; colOffset <= 1; colOffset++) {
+            checkRow = myPosition.getRow() + rowForward;
             checkCol = myPosition.getColumn() + colOffset;
             checkPosition = new ChessPosition(checkRow, checkCol);
-            if (PieceMovesCalculator.withinBounds(checkPosition)) {
-                if (board.getPiece(checkPosition) != null && board.getPiece(checkPosition).getTeamColor() != teamColor) {
-                    //Promote if at end of board
-                    if (checkRow == BOARD_LOWER_LIMIT || checkRow == BOARD_UPPER_LIMIT) {
-                        pawnMoves.addAll(pawnPromotionMoves(myPosition, checkPosition));
+            if (!isValidPosition(checkPosition)) continue;
+            if (colOffset == 0) {
+                if (isNullPiece(board, checkPosition)) {
+                    if (checkRow == promotionRow) {
+                        pieceMoves.addAll(promotionMoves(myPosition, checkPosition));
                     }
                     else {
-                        pawnMoves.add(new ChessMove(myPosition, checkPosition, null));
+                        pieceMoves.add(new ChessMove(myPosition, checkPosition, null));
+                    }
+                    if (myPosition.getRow() == startRow) {
+                        checkRow += rowForward;
+                        checkPosition = new ChessPosition(checkRow, checkCol);
+                        if (isValidPosition(checkPosition)
+                                && isNullPiece(board, checkPosition)) {
+                            pieceMoves.add(new ChessMove(myPosition, checkPosition, null));
+                        }
+                    }
+                }
+            }
+            else {
+                if (isEnemyTeam(board, myPosition, checkPosition)) {
+                    if (checkRow == promotionRow) {
+                        pieceMoves.addAll(promotionMoves(myPosition, checkPosition));
+                    }
+                    else {
+                        pieceMoves.add(new ChessMove(myPosition, checkPosition, null));
                     }
                 }
             }
         }
-        return pawnMoves;
+
+        return pieceMoves;
     }
 }

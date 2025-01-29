@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
-    private final ChessPiece.PieceType type;
+    private final PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
@@ -52,7 +52,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        PieceMovesCalculator movesCalculator = switch (type) {
+        PieceMovesCalculator calculator = switch (type) {
             case BISHOP -> new BishopMovesCalculator();
             case KING -> new KingMovesCalculator();
             case KNIGHT -> new KnightMovesCalculator();
@@ -60,7 +60,7 @@ public class ChessPiece {
             case QUEEN -> new QueenMovesCalculator();
             case ROOK -> new RookMovesCalculator();
         };
-        return movesCalculator.pieceMoves(board, myPosition);
+        return calculator.pieceMoves(board, myPosition);
     }
 
     @Override
