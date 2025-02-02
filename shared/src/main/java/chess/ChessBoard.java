@@ -17,6 +17,14 @@ public class ChessBoard {
 
     }
 
+    public ChessBoard(ChessBoard newBoard) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                board[i][j] = newBoard.board[i][j];
+            }
+        }
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
@@ -85,5 +93,44 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    private String pieceToString(ChessPiece chessPiece) {
+        if (chessPiece == null) {
+            return "| ";
+        }
+        else if (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            return switch (chessPiece.getPieceType()) {
+                case KING -> "|k";
+                case QUEEN -> "|q";
+                case BISHOP -> "|b";
+                case KNIGHT -> "|n";
+                case ROOK -> "|r";
+                case PAWN -> "|p";
+            };
+        }
+        else {
+            return switch (chessPiece.getPieceType()) {
+                case KING -> "|K";
+                case QUEEN -> "|Q";
+                case BISHOP -> "|B";
+                case KNIGHT -> "|N";
+                case ROOK -> "|R";
+                case PAWN -> "|P";
+            };
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                ChessPiece chessPiece = board[i][j];
+                stringBuilder.append(pieceToString(chessPiece));
+            }
+            stringBuilder.append("|\n");
+        }
+        return stringBuilder.toString();
     }
 }
