@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -19,7 +20,7 @@ public class ChessGame {
 
     public ChessGame(ChessGame chessGame) {
         this.teamTurn = chessGame.teamTurn;
-        this.board = chessGame.board;
+        this.board = new ChessBoard(chessGame.board);
     }
 
     /**
@@ -59,7 +60,16 @@ public class ChessGame {
         }
         else {
             ChessPiece chessPiece = board.getPiece(startPosition);
-            return chessPiece.pieceMoves(board, startPosition);
+            Collection<ChessMove> proposedMoves = chessPiece.pieceMoves(board, startPosition);
+            Collection<ChessMove> validMoves = new HashSet<>();
+            for (ChessMove move : proposedMoves) {
+                ChessGame checkGame = new ChessGame(this);
+                checkGame.changeBoard(move);
+                if (!checkGame.isInCheck(chessPiece.getTeamColor())) {
+                    validMoves.add(move);
+                }
+            }
+            return validMoves;
         }
     }
 
@@ -108,8 +118,8 @@ public class ChessGame {
                 ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
                 ChessPiece gamePiece = getBoard().getPiece(checkPosition);
                 if (gamePiece != null && gamePiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> validMoves = validMoves(checkPosition);
-                    for (ChessMove move : validMoves) {
+                    Collection<ChessMove> moves = gamePiece.pieceMoves(board, checkPosition);
+                    for (ChessMove move : moves) {
                         ChessPiece checkPiece = board.getPiece(move.getEndPosition());
                         if (checkPiece != null && checkPiece.getPieceType() == ChessPiece.PieceType.KING) {
                             return true;
