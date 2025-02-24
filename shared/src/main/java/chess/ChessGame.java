@@ -10,7 +10,7 @@ import java.util.HashSet;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private final int BOARD_SIZE = 8;
+    static final int BOARD_SIZE = 8;
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board = new ChessBoard();
 
@@ -114,6 +114,19 @@ public class ChessGame {
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
+    private boolean pieceCanCaptureKing(TeamColor teamColor, ChessPosition checkPosition, ChessPiece gamePiece) {
+        if (gamePiece != null && gamePiece.getTeamColor() != teamColor) {
+            Collection<ChessMove> moves = gamePiece.pieceMoves(board, checkPosition);
+            for (ChessMove move : moves) {
+                ChessPiece checkPiece = board.getPiece(move.getEndPosition());
+                if (checkPiece != null && checkPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -125,14 +138,8 @@ public class ChessGame {
             for (int checkCol = 1; checkCol <= BOARD_SIZE; checkCol++) {
                 ChessPosition checkPosition = new ChessPosition(checkRow, checkCol);
                 ChessPiece gamePiece = getBoard().getPiece(checkPosition);
-                if (gamePiece != null && gamePiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = gamePiece.pieceMoves(board, checkPosition);
-                    for (ChessMove move : moves) {
-                        ChessPiece checkPiece = board.getPiece(move.getEndPosition());
-                        if (checkPiece != null && checkPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                            return true;
-                        }
-                    }
+                if (pieceCanCaptureKing(teamColor, checkPosition, gamePiece)) {
+                    return true;
                 }
             }
         }
@@ -163,7 +170,9 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return existValidMoves(teamColor);
         }
-        else return false;
+        else {
+            return false;
+        }
     }
 
     /**
@@ -177,7 +186,9 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false;
         }
-        else return existValidMoves(teamColor);
+        else {
+            return existValidMoves(teamColor);
+        }
     }
 
     /**

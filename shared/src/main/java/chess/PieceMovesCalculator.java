@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 abstract class PieceMovesCalculator {
-    int BOARD_LOWER_LIMIT = 1;
-    int BOARD_UPPER_LIMIT = 8;
+    static final int BOARD_LOWER_LIMIT = 1;
+    static final int BOARD_UPPER_LIMIT = 8;
 
     abstract Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
 
