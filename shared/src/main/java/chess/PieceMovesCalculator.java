@@ -76,7 +76,9 @@ abstract class PieceMovesCalculator {
                     slideMoves.add(new ChessMove(myPosition, checkPosition, null));
                     break;
                 }
-                else break;
+                else {
+                    break;
+                }
             }
         }
 
