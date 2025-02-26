@@ -1,17 +1,17 @@
 package dataaccess;
 
-import model.UserData;
+import model.GameData;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MemoryUserDAO implements UserDAO {
-    Map<String, UserData> userDataMap = new HashMap<>();
+public class MemoryGameDAO implements GameDAO {
+    Map<Integer, GameData> gameDataMap = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {
         try {
-            userDataMap.clear();
+            gameDataMap.clear();
         }
         catch (Exception e) {
             throw new DataAccessException(e.getMessage());
@@ -19,9 +19,9 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException{
+    public GameData getGame(int gameID) throws DataAccessException {
         try {
-            return userDataMap.get(username);
+            return gameDataMap.get(gameID);
         }
         catch (Exception e) {
             throw new DataAccessException(e.getMessage());
@@ -29,9 +29,9 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
+    public void createGame(GameData gameData) throws DataAccessException {
         try {
-            userDataMap.put(userData.username(), userData);
+            gameDataMap.put(gameData.gameID(), gameData);
         }
         catch (Exception e) {
             throw new DataAccessException(e.getMessage());

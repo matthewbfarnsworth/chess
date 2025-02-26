@@ -10,11 +10,11 @@ import service.ServiceException;
 import service.UserService;
 import spark.*;
 
-public class Handler {
+public class UserHandler {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public Handler(UserDAO userDAO, AuthDAO authDAO) {
+    public UserHandler(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
     }
