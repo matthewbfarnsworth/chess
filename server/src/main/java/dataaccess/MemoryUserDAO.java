@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryUserDAO implements UserDAO {
-    Map<String, UserData> userDataMap = new HashMap<>();
+    private final Map<String, UserData> userDataMap = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {

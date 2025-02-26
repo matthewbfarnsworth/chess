@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
-    Map<Integer, GameData> gameDataMap = new HashMap<>();
+    private final Map<Integer, GameData> gameDataMap = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {
