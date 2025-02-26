@@ -45,7 +45,7 @@ public class UserServiceTests {
     public void testRegisterRequestWithNullValues() {
         RegisterRequest request = new RegisterRequest("name", null, "email@gmail.com");
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            RegisterResult result = userService.register(request);
+            userService.register(request);
         });
         Assertions.assertEquals(400, exception.getCode());
     }
