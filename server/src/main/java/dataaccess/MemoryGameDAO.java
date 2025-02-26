@@ -37,4 +37,13 @@ public class MemoryGameDAO implements GameDAO {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    @Override
+    public int generateGameID() {
+        int gameID = gameDataMap.size() + 1;
+        while (gameDataMap.containsKey(gameID)) {
+            gameID++;
+        }
+        return gameID;
+    }
 }
