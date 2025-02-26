@@ -77,5 +77,31 @@ public class UserServiceTests {
         });
         Assertions.assertEquals(401, exception.getCode());
     }
+
+    @Test
+    public void testValidLogoutRequest() {
+        try {
+            userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
+            LoginResult loginResult = userService.login(new LoginRequest("name", "password"));
+            Assertions.assertNotNull(authDAO.getAuth(loginResult.authToken()));
+            LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
+            userService.logout(logoutRequest);
+            Assertions.assertNull(authDAO.getAuth(loginResult.authToken()));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testInvalidLogoutRequest() {
+        userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
+        userService.login(new LoginRequest("name", "password"));
+        LogoutRequest logoutRequest = new LogoutRequest("a");
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
+            userService.logout(logoutRequest);
+        });
+        Assertions.assertEquals(401, exception.getCode());
+    }
   
 }

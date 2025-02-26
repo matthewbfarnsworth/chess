@@ -16,7 +16,7 @@ public class UserHandler {
         this.authDAO = authDAO;
     }
 
-    private Object JsonErrorFromServiceException(ServiceException e, Response sparkResponse) {
+    private Object jsonErrorFromServiceException(ServiceException e, Response sparkResponse) {
         sparkResponse.status(e.getCode());
         JsonObject returnObject = new JsonObject();
         returnObject.addProperty("message", e.getMessage());
@@ -32,7 +32,7 @@ public class UserHandler {
             return new Gson().toJson(registerResult);
         }
         catch (ServiceException e) {
-            return JsonErrorFromServiceException(e, sparkResponse);
+            return jsonErrorFromServiceException(e, sparkResponse);
         }
     }
 
@@ -45,7 +45,20 @@ public class UserHandler {
             return new Gson().toJson(loginResult);
         }
         catch (ServiceException e) {
-            return JsonErrorFromServiceException(e, sparkResponse);
+            return jsonErrorFromServiceException(e, sparkResponse);
+        }
+    }
+
+    public Object handleLogout(Request sparkRequest, Response sparkResponse) {
+        LogoutRequest logoutRequest = new LogoutRequest(sparkRequest.headers("authorization"));
+        try {
+            UserService userService = new UserService(userDAO, authDAO);
+            userService.logout(logoutRequest);
+            sparkResponse.status(200);
+            return new JsonObject();
+        }
+        catch (ServiceException e) {
+            return jsonErrorFromServiceException(e, sparkResponse);
         }
     }
 

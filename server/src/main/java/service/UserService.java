@@ -61,4 +61,22 @@ public class UserService {
             throw new ServiceException("Error: ".concat(e.getMessage()), 500);
         }
     }
+
+    public void logout(LogoutRequest request) throws ServiceException {
+        try {
+            if (request.authToken() == null) {
+                throw new ServiceException("Error: unauthorized", 401);
+            }
+
+            AuthData authData = authDAO.getAuth(request.authToken());
+            if (authData == null || !request.authToken().equals(authData.authToken())) {
+                throw new ServiceException("Error: unauthorized", 401);
+            }
+
+            authDAO.deleteAuth(authData);
+        }
+        catch (DataAccessException e) {
+            throw new ServiceException("Error: ".concat(e.getMessage()), 500);
+        }
+    }
 }
