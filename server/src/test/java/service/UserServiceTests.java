@@ -21,8 +21,7 @@ public class UserServiceTests {
     public void testValidRegisterRequest() {
         RegisterRequest request = new RegisterRequest("name", "password", "email@gmail.com");
         RegisterResult result = userService.register(request);
-        Assertions.assertEquals(result.code(), 200);
-        Assertions.assertEquals(result.username(), request.username());
+        Assertions.assertEquals(request.username(), result.username());
         Assertions.assertNotNull(result.authToken());
     }
 
@@ -48,6 +47,35 @@ public class UserServiceTests {
             userService.register(request);
         });
         Assertions.assertEquals(400, exception.getCode());
+    }
+
+    @Test
+    public void testValidLoginRequest() {
+        userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
+        LoginRequest request = new LoginRequest("name", "password");
+        LoginResult result = userService.login(request);
+        Assertions.assertEquals(request.username(), result.username());
+        Assertions.assertNotNull(result.authToken());
+    }
+
+    @Test
+    public void testInvalidUsernameLoginRequest() {
+        userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
+        LoginRequest request = new LoginRequest("wrongName", "password");
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
+            userService.login(request);
+        });
+        Assertions.assertEquals(401, exception.getCode());
+    }
+
+    @Test
+    public void testInvalidPasswordLoginRequest() {
+        userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
+        LoginRequest request = new LoginRequest("name", "wrongPassword");
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
+            userService.login(request);
+        });
+        Assertions.assertEquals(401, exception.getCode());
     }
   
 }
