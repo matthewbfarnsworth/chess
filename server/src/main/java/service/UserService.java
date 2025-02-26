@@ -62,14 +62,14 @@ public class UserService {
         }
     }
 
-    public void logout(LogoutRequest request) throws ServiceException {
+    public void logout(String authToken) throws ServiceException {
         try {
-            if (request.authToken() == null) {
+            if (authToken == null) {
                 throw new ServiceException("Error: unauthorized", 401);
             }
 
-            AuthData authData = authDAO.getAuth(request.authToken());
-            if (authData == null || !request.authToken().equals(authData.authToken())) {
+            AuthData authData = authDAO.getAuth(authToken);
+            if (authData == null || !authToken.equals(authData.authToken())) {
                 throw new ServiceException("Error: unauthorized", 401);
             }
 

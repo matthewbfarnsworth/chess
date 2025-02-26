@@ -50,10 +50,10 @@ public class UserHandler {
     }
 
     public Object handleLogout(Request sparkRequest, Response sparkResponse) {
-        LogoutRequest logoutRequest = new LogoutRequest(sparkRequest.headers("authorization"));
+        String authToken = sparkRequest.headers("authorization");
         try {
             UserService userService = new UserService(userDAO, authDAO);
-            userService.logout(logoutRequest);
+            userService.logout(authToken);
             sparkResponse.status(200);
             return new JsonObject();
         }

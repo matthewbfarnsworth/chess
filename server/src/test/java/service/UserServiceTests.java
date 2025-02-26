@@ -84,8 +84,7 @@ public class UserServiceTests {
             userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
             LoginResult loginResult = userService.login(new LoginRequest("name", "password"));
             Assertions.assertNotNull(authDAO.getAuth(loginResult.authToken()));
-            LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
-            userService.logout(logoutRequest);
+            userService.logout(loginResult.authToken());
             Assertions.assertNull(authDAO.getAuth(loginResult.authToken()));
         }
         catch (DataAccessException e) {
@@ -97,9 +96,8 @@ public class UserServiceTests {
     public void testInvalidLogoutRequest() {
         userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
         userService.login(new LoginRequest("name", "password"));
-        LogoutRequest logoutRequest = new LogoutRequest("a");
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            userService.logout(logoutRequest);
+            userService.logout("a");
         });
         Assertions.assertEquals(401, exception.getCode());
     }
