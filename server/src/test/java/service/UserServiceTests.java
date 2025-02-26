@@ -30,9 +30,8 @@ public class UserServiceTests {
         try {
             userDAO.createUser(new UserData("name", "password", "email@gmail.com"));
             RegisterRequest request = new RegisterRequest("name", "pass", "e@gmail.com");
-            ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-                userService.register(request);
-            });
+            ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                    userService.register(request));
             Assertions.assertEquals(403, exception.getCode());
         }
         catch (DataAccessException e) {
@@ -43,9 +42,8 @@ public class UserServiceTests {
     @Test
     public void testRegisterRequestWithNullValues() {
         RegisterRequest request = new RegisterRequest("name", null, "email@gmail.com");
-        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            userService.register(request);
-        });
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                userService.register(request));
         Assertions.assertEquals(400, exception.getCode());
     }
 
@@ -62,9 +60,8 @@ public class UserServiceTests {
     public void testInvalidUsernameLoginRequest() {
         userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
         LoginRequest request = new LoginRequest("wrongName", "password");
-        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            userService.login(request);
-        });
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                userService.login(request));
         Assertions.assertEquals(401, exception.getCode());
     }
 
@@ -72,9 +69,8 @@ public class UserServiceTests {
     public void testInvalidPasswordLoginRequest() {
         userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
         LoginRequest request = new LoginRequest("name", "wrongPassword");
-        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            userService.login(request);
-        });
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                userService.login(request));
         Assertions.assertEquals(401, exception.getCode());
     }
 
@@ -96,9 +92,7 @@ public class UserServiceTests {
     public void testInvalidLogoutRequest() {
         userService.register(new RegisterRequest("name", "password", "email@gmail.com"));
         userService.login(new LoginRequest("name", "password"));
-        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            userService.logout("a");
-        });
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> userService.logout("a"));
         Assertions.assertEquals(401, exception.getCode());
     }
   
