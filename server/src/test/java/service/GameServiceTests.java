@@ -19,6 +19,44 @@ public class GameServiceTests {
     }
 
     @Test
+    public void testValidEmptyListGames() {
+        try {
+            authDAO.createAuth(new AuthData("a", "username"));
+            ListGamesResult result = gameService.listGames("a");
+            Assertions.assertNotNull(result.games());
+            Assertions.assertEquals(0, result.games().size());
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testValidThreeListGames() {
+        try {
+            authDAO.createAuth(new AuthData("a", "username"));
+            gameService.createGame("a", new CreateGameRequest("game1"));
+            gameService.createGame("a", new CreateGameRequest("game2"));
+            gameService.createGame("a", new CreateGameRequest("game3"));
+            ListGamesResult result = gameService.listGames("a");
+            Assertions.assertEquals(3, result.games().size());
+            Assertions.assertEquals(new ListedGame(1, null, null, "game1"), result.games().get(0));
+            Assertions.assertEquals(new ListedGame(2, null, null, "game2"), result.games().get(1));
+            Assertions.assertEquals(new ListedGame(3, null, null, "game3"), result.games().get(2));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testInvalidAuthDataListGames() {
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                gameService.listGames("a"));
+        Assertions.assertEquals(401, exception.getCode());
+    }
+
+    @Test
     public void testValidCreateGameRequest() {
         try {
             authDAO.createAuth(new AuthData("a", "username"));

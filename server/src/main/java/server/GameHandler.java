@@ -16,11 +16,20 @@ public class GameHandler {
         this.gameDAO = gameDAO;
     }
 
-    private Object jsonErrorFromServiceException(ServiceException e, Response sparkResponse) {
-        sparkResponse.status(e.getCode());
-        JsonObject returnObject = new JsonObject();
-        returnObject.addProperty("message", e.getMessage());
-        return returnObject;
+    public Object handleListGames(Request sparkRequest, Response sparkResponse) {
+        String authToken = sparkRequest.headers("authorization");
+        try {
+            GameService gameService = new GameService(authDAO, gameDAO);
+            ListGamesResult listGamesResult = gameService.listGames(authToken);
+            sparkResponse.status(200);
+            return new Gson().toJson(listGamesResult);
+        }
+        catch (ServiceException e) {
+            sparkResponse.status(e.getCode());
+            JsonObject returnObject = new JsonObject();
+            returnObject.addProperty("message", e.getMessage());
+            return returnObject;
+        }
     }
 
     public Object handleCreateGame(Request sparkRequest, Response sparkResponse) {
@@ -33,7 +42,10 @@ public class GameHandler {
             return new Gson().toJson(createGameResult);
         }
         catch (ServiceException e) {
-            return jsonErrorFromServiceException(e, sparkResponse);
+            sparkResponse.status(e.getCode());
+            JsonObject returnObject = new JsonObject();
+            returnObject.addProperty("message", e.getMessage());
+            return returnObject;
         }
     }
 }
