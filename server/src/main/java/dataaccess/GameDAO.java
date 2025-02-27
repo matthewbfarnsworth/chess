@@ -10,4 +10,9 @@ public interface GameDAO {
     void createGame(GameData gameData) throws DataAccessException;
     List<GameData> listGames() throws DataAccessException;
     int generateGameID();
+    enum Color {
+        WHITE,
+        BLACK
+    }
+    void updateGame(int gameID, String username, Color color) throws DataAccessException;
 }

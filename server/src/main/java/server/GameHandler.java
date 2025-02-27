@@ -26,9 +26,7 @@ public class GameHandler {
         }
         catch (ServiceException e) {
             sparkResponse.status(e.getCode());
-            JsonObject returnObject = new JsonObject();
-            returnObject.addProperty("message", e.getMessage());
-            return returnObject;
+            return new Gson().toJson(new ErrorResult(e.getMessage()));
         }
     }
 
@@ -43,9 +41,22 @@ public class GameHandler {
         }
         catch (ServiceException e) {
             sparkResponse.status(e.getCode());
-            JsonObject returnObject = new JsonObject();
-            returnObject.addProperty("message", e.getMessage());
-            return returnObject;
+            return new Gson().toJson(new ErrorResult(e.getMessage()));
+        }
+    }
+
+    public Object handleJoinGame(Request sparkRequest, Response sparkResponse) {
+        String authToken = sparkRequest.headers("authorization");
+        JoinGameRequest joinGameRequest = new Gson().fromJson(sparkRequest.body(), JoinGameRequest.class);
+        try {
+            GameService gameService = new GameService(authDAO, gameDAO);
+            gameService.joinGame(authToken, joinGameRequest);
+            sparkResponse.status(200);
+            return new JsonObject();
+        }
+        catch (ServiceException e) {
+            sparkResponse.status(e.getCode());
+            return new Gson().toJson(new ErrorResult(e.getMessage()));
         }
     }
 }

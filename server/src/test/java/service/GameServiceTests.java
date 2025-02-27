@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,5 +84,49 @@ public class GameServiceTests {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
                 gameService.createGame("a", request));
         Assertions.assertEquals(400, exception.getCode());
+    }
+
+    @Test
+    public void testValidJoinGameRequest() {
+        try {
+            authDAO.createAuth(new AuthData("a", "username"));
+            gameService.createGame("a", new CreateGameRequest("myGame"));
+            JoinGameRequest request = new JoinGameRequest("WHITE", 1);
+            gameService.joinGame("a", request);
+            GameData gameData = gameDAO.getGame(1);
+            Assertions.assertEquals(new GameData(1, "username", null, "myGame", gameData.game()), gameData);
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testInvalidJoinGameRequest() {
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                gameService.joinGame("a", new JoinGameRequest("WHIT", 1)));
+        Assertions.assertEquals(400, exception.getCode());
+    }
+
+    @Test
+    public void testInvalidAuthTokenJoinGameRequest() {
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                gameService.joinGame("a", new JoinGameRequest("WHITE", 1)));
+        Assertions.assertEquals(401, exception.getCode());
+    }
+
+    @Test
+    public void testTakenJoinGameRequest() {
+        try {
+            authDAO.createAuth(new AuthData("a", "username"));
+            gameService.createGame("a", new CreateGameRequest("myGame"));
+            gameService.joinGame("a", new JoinGameRequest("WHITE", 1));
+            ServiceException exception = Assertions.assertThrows(ServiceException.class, () ->
+                    gameService.joinGame("a", new JoinGameRequest("WHITE", 1)));
+            Assertions.assertEquals(403, exception.getCode());
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

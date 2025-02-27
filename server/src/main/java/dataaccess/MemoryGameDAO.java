@@ -58,4 +58,19 @@ public class MemoryGameDAO implements GameDAO {
         }
         return gameID;
     }
+
+    @Override
+    public void updateGame(int gameID, String username, Color color) throws DataAccessException {
+        try {
+            GameData game = gameDataMap.get(gameID);
+            GameData newGame = switch (color) {
+                case WHITE -> new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
+                case BLACK -> new GameData(gameID, game.whiteUsername(), username, game.gameName(),game.game());
+            };
+            gameDataMap.replace(gameID, newGame);
+        }
+        catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 }

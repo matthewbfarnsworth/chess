@@ -1,10 +1,12 @@
 package server;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import service.DBService;
+import service.ErrorResult;
 import service.ServiceException;
 import spark.*;
 
@@ -28,9 +30,7 @@ public class DBHandler {
         }
         catch (ServiceException e) {
             sparkResponse.status(e.getCode());
-            JsonObject returnObject = new JsonObject();
-            returnObject.addProperty("message", e.getMessage());
-            return returnObject;
+            return new Gson().toJson(new ErrorResult(e.getMessage()));
         }
     }
 }
