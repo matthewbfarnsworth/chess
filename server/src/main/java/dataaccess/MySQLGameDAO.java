@@ -4,7 +4,12 @@ import model.GameData;
 
 import java.util.List;
 
-public class MySQLGameDAO implements GameDAO {
+public class MySQLGameDAO extends MySQLDAO implements GameDAO {
+
+    public MySQLGameDAO() throws DataAccessException {
+
+    }
+
     @Override
     public void clear() throws DataAccessException {
 
