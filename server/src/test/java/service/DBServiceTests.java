@@ -3,7 +3,6 @@ package service;
 import dataaccess.*;
 
 import model.AuthData;
-import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 
@@ -26,7 +25,7 @@ public class DBServiceTests {
         try {
             userDAO.createUser(new UserData("username", "password", "email"));
             authDAO.createAuth(new AuthData("a", "username"));
-            gameDAO.createGame(new GameData(1, null, null, "g", null));
+            gameDAO.createGame("g");
             Assertions.assertNotNull(userDAO.getUser("username"));
             Assertions.assertNotNull(authDAO.getAuth("a"));
             Assertions.assertNotNull(gameDAO.getGame(1));

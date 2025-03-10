@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -31,9 +32,11 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(String gameName) throws DataAccessException {
         try {
-            gameDataMap.put(gameData.gameID(), gameData);
+            int gameID = generateGameID();
+            gameDataMap.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame()));
+            return gameID;
         }
         catch (Exception e) {
             throw new DataAccessException(e.getMessage());
@@ -50,8 +53,7 @@ public class MemoryGameDAO implements GameDAO {
         }
     }
 
-    @Override
-    public int generateGameID() {
+    private int generateGameID() {
         int gameID = gameDataMap.size() + 1;
         while (gameDataMap.containsKey(gameID)) {
             gameID++;

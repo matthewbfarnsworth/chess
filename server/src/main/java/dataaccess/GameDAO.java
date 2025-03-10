@@ -7,9 +7,8 @@ import java.util.List;
 public interface GameDAO {
     void clear() throws DataAccessException;
     GameData getGame(int gameID) throws DataAccessException;
-    void createGame(GameData gameData) throws DataAccessException;
+    int createGame(String gameName) throws DataAccessException;
     List<GameData> listGames() throws DataAccessException;
-    int generateGameID();
     enum Color {
         WHITE,
         BLACK

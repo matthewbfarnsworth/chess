@@ -4,7 +4,7 @@ import model.GameData;
 
 import java.util.List;
 
-public class GameDAOImpl implements GameDAO {
+public class MySQLGameDAO implements GameDAO {
     @Override
     public void clear() throws DataAccessException {
 
@@ -16,18 +16,13 @@ public class GameDAOImpl implements GameDAO {
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
-
+    public int createGame(String gameName) throws DataAccessException {
+        return 0;
     }
 
     @Override
     public List<GameData> listGames() throws DataAccessException {
         return List.of();
-    }
-
-    @Override
-    public int generateGameID() {
-        return 0;
     }
 
     @Override
