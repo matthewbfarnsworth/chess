@@ -38,15 +38,50 @@ public class DatabaseManager {
      */
     static void createDatabase() throws DataAccessException {
         try {
-            var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
+            var createDatabaseStatement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
+            try (var preparedStatement = conn.prepareStatement(createDatabaseStatement)) {
                 preparedStatement.executeUpdate();
+            }
+            for (var createTableStatement : CREATE_TABLE_STRING) {
+                try (var preparedStatement = conn.prepareStatement(createTableStatement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    private static final String[] CREATE_TABLE_STRING = {
+            """
+            CREATE TABLE IF NOT EXISTS userData (
+                id int NOT NULL AUTO_INCREMENT,
+                username varchar(256) NOT NULL,
+                password varchar(256) NOT NULL,
+                email varchar(256) NOT NULL,
+                PRIMARY KEY (id),
+                INDEX(username)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            
+            CREATE TABLE IF NOT EXISTS authData (
+                id int NOT NULL AUTO_INCREMENT,
+                authToken varchar(256) NOT NULL,
+                username varchar(256) NOT NULL,
+                PRIMARY KEY (id),
+                INDEX(username)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            
+            CREATE TABLE IF NOT EXISTS gameData (
+                id int NOT NULL AUTO_INCREMENT,
+                whiteUsername varchar(256),
+                blackUsername varchar(256),
+                gameName varchar(256) NOT NULL,
+                game TEXT NOT NULL,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """
+    };
 
     /**
      * Create a connection to the database and sets the catalog based upon the
