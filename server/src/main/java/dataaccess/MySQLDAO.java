@@ -17,7 +17,7 @@ public class MySQLDAO {
             """
             CREATE TABLE IF NOT EXISTS userData (
                 id int NOT NULL AUTO_INCREMENT,
-                username varchar(256) NOT NULL,
+                username varchar(256) NOT NULL UNIQUE,
                 password varchar(256) NOT NULL,
                 email varchar(256) NOT NULL,
                 PRIMARY KEY (id),
@@ -28,7 +28,7 @@ public class MySQLDAO {
             CREATE TABLE IF NOT EXISTS authData (
                 id int NOT NULL AUTO_INCREMENT,
                 authToken varchar(256) NOT NULL,
-                username varchar(256) NOT NULL,
+                username varchar(256) NOT NULL UNIQUE,
                 PRIMARY KEY (id),
                 INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
