@@ -14,6 +14,13 @@ public class UserServiceTests {
     public void setupEach() {
         userDAO = new MySQLUserDAO();
         authDAO = new MySQLAuthDAO();
+        try {
+            userDAO.clear();
+            authDAO.clear();
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
         userService = new UserService(userDAO, authDAO);
     }
 

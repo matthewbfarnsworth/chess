@@ -16,6 +16,13 @@ public class GameServiceTests {
     public void setupEach() {
         authDAO = new MySQLAuthDAO();
         gameDAO = new MySQLGameDAO();
+        try {
+            authDAO.clear();
+            gameDAO.clear();
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
         gameService = new GameService(authDAO, gameDAO);
     }
 

@@ -17,6 +17,14 @@ public class DBServiceTests {
         userDAO = new MySQLUserDAO();
         authDAO = new MySQLAuthDAO();
         gameDAO = new MySQLGameDAO();
+        try {
+            userDAO.clear();
+            authDAO.clear();
+            gameDAO.clear();
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
         dbService = new DBService(userDAO, authDAO, gameDAO);
     }
 
