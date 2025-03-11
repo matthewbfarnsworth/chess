@@ -14,8 +14,8 @@ public class GameServiceTests {
 
     @BeforeEach
     public void setupEach() {
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
+        authDAO = new MySQLAuthDAO();
+        gameDAO = new MySQLGameDAO();
         gameService = new GameService(authDAO, gameDAO);
     }
 

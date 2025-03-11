@@ -6,10 +6,6 @@ import java.util.List;
 
 public class MySQLGameDAO extends MySQLDAO implements GameDAO {
 
-    public MySQLGameDAO() throws DataAccessException {
-
-    }
-
     @Override
     public void clear() throws DataAccessException {
 

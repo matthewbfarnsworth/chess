@@ -4,8 +4,13 @@ import java.sql.SQLException;
 
 public class MySQLDAO {
 
-    public MySQLDAO() throws DataAccessException {
-        configureDatabase();
+    public MySQLDAO()  {
+        try {
+            configureDatabase();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static final String[] CREATE_TABLE_STATEMENTS = {

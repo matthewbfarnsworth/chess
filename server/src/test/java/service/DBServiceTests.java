@@ -14,9 +14,9 @@ public class DBServiceTests {
 
     @BeforeEach
     public void setupEach() {
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
+        userDAO = new MySQLUserDAO();
+        authDAO = new MySQLAuthDAO();
+        gameDAO = new MySQLGameDAO();
         dbService = new DBService(userDAO, authDAO, gameDAO);
     }
 

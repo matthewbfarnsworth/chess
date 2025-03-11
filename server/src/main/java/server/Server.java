@@ -4,9 +4,9 @@ import dataaccess.*;
 import spark.*;
 
 public class Server {
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final GameDAO gameDAO = new MemoryGameDAO();
+    private final UserDAO userDAO = new MySQLUserDAO();
+    private final AuthDAO authDAO = new MySQLAuthDAO();
+    private final GameDAO gameDAO = new MySQLGameDAO();
     private final DBHandler dbHandler = new DBHandler(userDAO, authDAO, gameDAO);
     private final UserHandler userHandler = new UserHandler(userDAO, authDAO);
     private final GameHandler gameHandler = new GameHandler(authDAO, gameDAO);
