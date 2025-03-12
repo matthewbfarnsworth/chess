@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,10 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MySQLDAOTests {
     MySQLUserDAO userDAO = new MySQLUserDAO();
     MySQLAuthDAO authDAO = new MySQLAuthDAO();
+    MySQLGameDAO gameDAO = new MySQLGameDAO();
 
     @BeforeAll
     public static void dropDatabase() {
@@ -41,7 +46,7 @@ public class MySQLDAOTests {
         try {
             userDAO.clear();
             authDAO.clear();
-            //gameDAO.clear();
+            gameDAO.clear();
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
@@ -183,5 +188,112 @@ public class MySQLDAOTests {
     @Test
     public void testEmptyDeleteAuth() {
         Assertions.assertDoesNotThrow(() -> authDAO.deleteAuth(new AuthData("a", "name")));
+    }
+
+    @Test
+    public void testGameClear() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            gameDAO.clear();
+            Assertions.assertNull(gameDAO.getGame(gameID));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidGetGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            GameData gameData = new GameData(gameID, null, null, "game", new ChessGame());
+            Assertions.assertEquals(gameData, gameDAO.getGame(gameID));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidGetGame() {
+        try {
+            Assertions.assertNull(gameDAO.getGame(1));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidCreateGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            GameData gameData = new GameData(gameID, null, null, "game", new ChessGame());
+            Assertions.assertEquals(gameData, gameDAO.getGame(gameID));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidCreateGame() {
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
+    }
+
+    @Test
+    public void testValidListGames() {
+        try {
+            int gameID1 = gameDAO.createGame("game1");
+            int gameID2 = gameDAO.createGame("game2");
+            List<GameData> listedGames = gameDAO.listGames();
+            GameData game1 = new GameData(gameID1, null, null, "game1", new ChessGame());
+            GameData game2 = new GameData(gameID2, null, null, "game2", new ChessGame());
+            List<GameData> expectedGames = new ArrayList<>();
+            expectedGames.add(game1);
+            expectedGames.add(game2);
+            Assertions.assertEquals(expectedGames, listedGames);
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEmptyListGames() {
+        try {
+            List<GameData> listedGames = gameDAO.listGames();
+            List<GameData> expectedGames = new ArrayList<>();
+            Assertions.assertEquals(expectedGames, listedGames);
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidUpdateGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            gameDAO.updateGame(gameID, "name", GameDAO.Color.WHITE);
+            GameData expected = new GameData(gameID, "name", null, "game", new ChessGame());
+            Assertions.assertEquals(expected, gameDAO.getGame(gameID));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidUpdateGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            gameDAO.updateGame(gameID+1, "name2", GameDAO.Color.WHITE);
+            GameData expected = new GameData(gameID, null, null, "game", new ChessGame());
+            Assertions.assertEquals(expected, gameDAO.getGame(gameID));
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

@@ -33,14 +33,14 @@ public class DBServiceTests {
         try {
             userDAO.createUser(new UserData("username", "password", "email"));
             authDAO.createAuth(new AuthData("a", "username"));
-            gameDAO.createGame("g");
+            int gameID = gameDAO.createGame("g");
             Assertions.assertNotNull(userDAO.getUser("username"));
             Assertions.assertNotNull(authDAO.getAuth("a"));
-            Assertions.assertNotNull(gameDAO.getGame(1));
+            Assertions.assertNotNull(gameDAO.getGame(gameID));
             dbService.clearApplication();
             Assertions.assertNull(userDAO.getUser("username"));
             Assertions.assertNull(authDAO.getAuth("a"));
-            Assertions.assertNull(gameDAO.getGame(1));
+            Assertions.assertNull(gameDAO.getGame(gameID));
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);
