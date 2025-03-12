@@ -90,9 +90,12 @@ public class MySQLDAOTests {
     @Test
     public void testValidCreateUser() {
         try {
-            UserData userData = new UserData("name", "password", "email@gmail.com");
-            userDAO.createUser(userData);
-            Assertions.assertEquals(userData, userDAO.getUser("name"));
+            UserData userData1 = new UserData("name1", "password", "email@gmail.com");
+            userDAO.createUser(userData1);
+            UserData userData2 = new UserData("name2", "password2", "email2@gmail.com");
+            userDAO.createUser(userData2);
+            Assertions.assertEquals(userData1, userDAO.getUser("name1"));
+            Assertions.assertEquals(userData2, userDAO.getUser("name2"));
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
@@ -149,9 +152,12 @@ public class MySQLDAOTests {
     @Test
     public void testValidCreateAuth() {
         try {
-            AuthData authData = new AuthData("a", "name");
-            authDAO.createAuth(authData);
-            Assertions.assertEquals(authData, authDAO.getAuth("a"));
+            AuthData authData1 = new AuthData("a", "name");
+            authDAO.createAuth(authData1);
+            AuthData authData2 = new AuthData("b", "name2");
+            authDAO.createAuth(authData2);
+            Assertions.assertEquals(authData1, authDAO.getAuth("a"));
+            Assertions.assertEquals(authData2, authDAO.getAuth("b"));
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
@@ -227,9 +233,12 @@ public class MySQLDAOTests {
     @Test
     public void testValidCreateGame() {
         try {
-            int gameID = gameDAO.createGame("game");
-            GameData gameData = new GameData(gameID, null, null, "game", new ChessGame());
-            Assertions.assertEquals(gameData, gameDAO.getGame(gameID));
+            int gameID1 = gameDAO.createGame("game");
+            GameData gameData1 = new GameData(gameID1, null, null, "game", new ChessGame());
+            int gameID2 = gameDAO.createGame("game2");
+            GameData gameData2 = new GameData(gameID2, null, null, "game2", new ChessGame());
+            Assertions.assertEquals(gameData1, gameDAO.getGame(gameID1));
+            Assertions.assertEquals(gameData2, gameDAO.getGame(gameID2));
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
