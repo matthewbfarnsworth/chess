@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,19 +16,6 @@ public class MySQLDAOTests {
     MySQLUserDAO userDAO = new MySQLUserDAO();
     MySQLAuthDAO authDAO = new MySQLAuthDAO();
     MySQLGameDAO gameDAO = new MySQLGameDAO();
-
-    @BeforeAll
-    public static void dropDatabase() {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "DROP DATABASE chess";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        }
-        catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @BeforeAll
     public static void testCreateDatabase() {
