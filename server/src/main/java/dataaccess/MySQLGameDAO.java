@@ -99,8 +99,8 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
     public void updateGame(int gameID, String username, Color color) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = switch (color) {
-                case Color.WHITE -> "UPDATE gameData SET whiteUsername=? WHERE gameID=?";
-                case Color.BLACK -> "UPDATE gameData SET blackUsername=? WHERE gameID=?";
+                case WHITE -> "UPDATE gameData SET whiteUsername=? WHERE gameID=?";
+                case BLACK -> "UPDATE gameData SET blackUsername=? WHERE gameID=?";
             };
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
