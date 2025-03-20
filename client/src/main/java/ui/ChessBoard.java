@@ -53,7 +53,7 @@ public class ChessBoard {
         return " " + output + EM_SPACE;
     }
 
-    private void printTile(String input, String backgroundColor, String textColor) {
+    private void printBlock(String input, String backgroundColor, String textColor) {
         System.out.print(backgroundColor);
         System.out.print(textColor);
         System.out.print(input);
@@ -62,34 +62,59 @@ public class ChessBoard {
     }
 
     private void printHeader(boolean isWhite) {
-        printTile(EMPTY, BORDER_COLOR, TEXT_COLOR);
-        for (int i = 1; i <= BOARD_SIZE; i++) {
-            printTile(intToLetter(i), BORDER_COLOR, TEXT_COLOR);
+        printBlock(EMPTY, BORDER_COLOR, TEXT_COLOR);
+        if (isWhite) {
+            for (int i = 1; i <= BOARD_SIZE; i++) {
+                printBlock(intToLetter(i), BORDER_COLOR, TEXT_COLOR);
+            }
         }
-        printTile(EMPTY, BORDER_COLOR, TEXT_COLOR);
+        else {
+            for (int i = BOARD_SIZE; i >= 1; i--) {
+                printBlock(intToLetter(i), BORDER_COLOR, TEXT_COLOR);
+            }
+        }
+        printBlock(EMPTY, BORDER_COLOR, TEXT_COLOR);
         System.out.println();
     }
 
+    private void printTile(chess.ChessBoard board, int row, int col) {
+        String tileColor = (row + col) % 2 == 0 ? DARK_TILE : LIGHT_TILE;
+        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+        if (piece == null) {
+            printBlock(EMPTY, tileColor, PIECE_COLOR);
+        }
+        else {
+            printBlock(pieceToString(piece), tileColor, PIECE_COLOR);
+        }
+    }
+
     private void printChessRow(chess.ChessBoard board, int row, boolean isWhite) {
-        printTile(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
-        for (int i = 1; i <= BOARD_SIZE; i++) {
-            String tileColor = (row + i) % 2 == 0 ? DARK_TILE : LIGHT_TILE;
-            ChessPiece piece = board.getPiece(new ChessPosition(row, i));
-            if (piece == null) {
-                printTile(EMPTY, tileColor, PIECE_COLOR);
-            }
-            else {
-                printTile(pieceToString(piece), tileColor, PIECE_COLOR);
+        printBlock(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
+        if (isWhite) {
+            for (int col = 1; col <= BOARD_SIZE; col++) {
+                printTile(board, row, col);
             }
         }
-        printTile(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
+        else {
+            for (int col = BOARD_SIZE; col >= 1; col--) {
+                printTile(board, row, col);
+            }
+        }
+        printBlock(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
         System.out.println();
     }
 
     public void printBoard(chess.ChessBoard board, boolean isWhite) {
         printHeader(isWhite);
-        for (int i = BOARD_SIZE; i >= 1; i--) {
-            printChessRow(board, i, isWhite);
+        if (isWhite) {
+            for (int i = BOARD_SIZE; i >= 1; i--) {
+                printChessRow(board, i, true);
+            }
+        }
+        else {
+            for (int i = 1; i <= BOARD_SIZE; i++) {
+                printChessRow(board, i, false);
+            }
         }
         printHeader(isWhite);
     }
