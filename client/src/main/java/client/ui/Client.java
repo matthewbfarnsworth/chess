@@ -3,7 +3,6 @@ package client.ui;
 import client.net.ResponseException;
 import client.net.ServerFacade;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
@@ -53,6 +52,7 @@ public class Client {
         }
         else if (state == State.LOGGED_IN) {
             switch (input) {
+                case "logout" -> logout();
                 case "quit" -> quit();
                 default -> helpLoggedIn();
             }
@@ -73,7 +73,7 @@ public class Client {
             var result = facade.login(username, password);
             authToken = result.authToken();
             state = State.LOGGED_IN;
-            System.out.println("Successfully logged in as user " + result.username());
+            System.out.println("Successfully logged in as user " + result.username() +".");
             helpLoggedIn();
         }
         catch (ResponseException e) {
@@ -108,7 +108,7 @@ public class Client {
             var result = facade.register(username, password, email);
             authToken = result.authToken();
             state = State.LOGGED_IN;
-            System.out.println("Successfully registered user " + result.username());
+            System.out.println("Successfully registered user " + result.username() + ".");
             helpLoggedIn();
         }
         catch (ResponseException e) {
@@ -130,6 +130,25 @@ public class Client {
                 -> register
                 -> quit
                 -> help""");
+    }
+
+    private void logout() {
+        System.out.println("Logging out:\n");
+
+        try {
+            facade.logout(authToken);
+            authToken = null;
+            state = State.LOGGED_OUT;
+            System.out.println("Successfully logged out.");
+            helpLoggedOut();
+        }
+        catch (ResponseException e) {
+            if (e.getCode() == 401) {
+                System.out.println("Invalid username or password. Failed to log in.");
+            } else {
+                System.out.println("An unexpected error occurred. Failed to log in.");
+            }
+        }
     }
 
     private void helpLoggedIn() {
