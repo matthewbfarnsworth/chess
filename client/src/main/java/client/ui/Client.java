@@ -52,6 +52,7 @@ public class Client {
         }
         else if (state == State.LOGGED_IN) {
             switch (input) {
+                case "create" -> create();
                 case "logout" -> logout();
                 case "quit" -> quit();
                 default -> helpLoggedIn();
@@ -130,6 +131,26 @@ public class Client {
                 -> register
                 -> quit
                 -> help""");
+    }
+
+    private void create() {
+        System.out.println("Creating a new game:");
+
+        System.out.print("\nEnter game name >>> ");
+        String gameName = getFirstString();
+
+        System.out.println();
+        try {
+            facade.createGame(authToken, gameName);
+            System.out.println("Successfully created the new game " + gameName + ".");
+        }
+        catch (ResponseException e) {
+            switch (e.getCode()) {
+                case 400 -> System.out.println("Invalid game name. Failed to create game.");
+                case 401 -> System.out.println("You are no longer logged in. Failed to create game.");
+                default -> System.out.println("An unexpected error occurred. Failed to register user.");
+            }
+        }
     }
 
     private void logout() {
