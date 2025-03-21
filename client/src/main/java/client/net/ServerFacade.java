@@ -37,4 +37,9 @@ public class ServerFacade {
         CreateGameRequest request = new CreateGameRequest(gameName);
         return communicator.makeRequest(serverURL, "POST", "/game", request, authToken, CreateGameResult.class);
     }
+
+    public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException {
+        JoinGameRequest request = new JoinGameRequest(playerColor, gameID);
+        communicator.makeRequest(serverURL, "PUT", "/game", request, authToken, null);
+    }
 }

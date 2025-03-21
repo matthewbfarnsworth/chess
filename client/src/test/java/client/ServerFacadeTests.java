@@ -117,4 +117,28 @@ public class ServerFacadeTests {
         Assertions.assertEquals(401, e.getCode());
     }
 
+    @Test
+    public void testServerFacadeValidJoinGame() {
+        RegisterResult registerResult = serverFacade.register("name", "password", "email@gmail.com");
+        String authToken = registerResult.authToken();
+        int gameID = serverFacade.createGame(authToken, "game").gameID();
+        Assertions.assertDoesNotThrow(() -> serverFacade.joinGame(authToken, "WHITE", gameID));
+        List<ListedGame> games = serverFacade.listGames(authToken).games();
+        Assertions.assertEquals(new ListedGame(gameID, "name", null, "game"), games.get(0));
+    }
+
+    @Test
+    public void testServerFacadeInvalidJoinGame() {
+        RegisterResult registerResult1 = serverFacade.register("name", "password", "email@gmail.com");
+        String authToken1 = registerResult1.authToken();
+        int gameID = serverFacade.createGame(authToken1, "game").gameID();
+        serverFacade.joinGame(authToken1, "WHITE", gameID);
+        serverFacade.logout(authToken1);
+        RegisterResult registerResult2 = serverFacade.register("name2", "password2", "email2@gmail.com");
+        String authToken2 = registerResult2.authToken();
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.joinGame(authToken2, "WHITE", gameID));
+        Assertions.assertEquals(403, e.getCode());
+    }
+
 }
