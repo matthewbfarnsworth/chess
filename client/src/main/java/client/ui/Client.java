@@ -2,7 +2,11 @@ package client.ui;
 
 import client.net.ResponseException;
 import client.net.ServerFacade;
+import service.ListedGame;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
@@ -11,6 +15,7 @@ public class Client {
     private State state = State.LOGGED_OUT;
     private boolean quit = false;
     private String authToken;
+    private Map<Integer, Integer> gameNumbers;
 
     private enum State {
         LOGGED_OUT,
@@ -46,15 +51,16 @@ public class Client {
             switch (input) {
                 case "login" -> login();
                 case "register" -> register();
-                case "quit" -> quit();
+                case "quit" -> quitLoggedOut();
                 default -> helpLoggedOut();
             }
         }
         else if (state == State.LOGGED_IN) {
             switch (input) {
                 case "create" -> create();
+                case "list" -> list();
                 case "logout" -> logout();
-                case "quit" -> quit();
+                case "quit" -> quitLoggedIn();
                 default -> helpLoggedIn();
             }
         }
@@ -121,7 +127,7 @@ public class Client {
         }
     }
 
-    private void quit() {
+    private void quitLoggedOut() {
         quit = true;
     }
 
@@ -148,7 +154,49 @@ public class Client {
             switch (e.getCode()) {
                 case 400 -> System.out.println("Invalid game name. Failed to create game.");
                 case 401 -> System.out.println("You are no longer logged in. Failed to create game.");
-                default -> System.out.println("An unexpected error occurred. Failed to register user.");
+                default -> System.out.println("An unexpected error occurred. Failed to create game.");
+            }
+        }
+    }
+
+    private Map<Integer, Integer> mapNumbersToGameIDs(List<ListedGame> games) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < games.size(); i++) {
+            map.put(i + 1, games.get(i).gameID());
+        }
+        return map;
+    }
+
+    private void list() {
+        System.out.println("Listing games:\n");
+
+        try {
+            var games = facade.listGames(authToken).games();
+            gameNumbers = mapNumbersToGameIDs(games);
+            for (int i = 0; i < games.size(); i++) {
+                var game = games.get(i);
+                System.out.print(i + 1);
+                System.out.print(": " + game.gameName() + " ");
+                if (game.whiteUsername() != null) {
+                    System.out.print("White: " + game.whiteUsername() + ". ");
+                }
+                else {
+                    System.out.print("White: OPEN. ");
+                }
+                if (game.blackUsername() != null) {
+                    System.out.print("Black: " + game.blackUsername() + ".");
+                }
+                else {
+                    System.out.print("Black: OPEN.");
+                }
+                System.out.println();
+            }
+        }
+        catch (ResponseException e) {
+            if (e.getCode() == 401) {
+                System.out.println("You are no longer logged in. Failed to list games.");
+            } else {
+                System.out.println("An unexpected error occurred. Failed to list games.");
             }
         }
     }
@@ -170,6 +218,16 @@ public class Client {
                 System.out.println("An unexpected error occurred. Failed to log in.");
             }
         }
+    }
+
+    private void quitLoggedIn() {
+        try {
+            facade.logout(authToken);
+        }
+        catch (ResponseException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        quit = true;
     }
 
     private void helpLoggedIn() {
