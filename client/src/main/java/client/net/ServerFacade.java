@@ -1,5 +1,7 @@
 package client.net;
 
+import service.LoginRequest;
+import service.LoginResult;
 import service.RegisterRequest;
 import service.RegisterResult;
 
@@ -19,5 +21,10 @@ public class ServerFacade {
         RegisterRequest request = new RegisterRequest(username, password, email);
         return communicator.makeRequest(serverURL, "POST", "/user", request, null,
                 RegisterResult.class);
+    }
+
+    public LoginResult login(String username, String password) throws ResponseException {
+        LoginRequest request = new LoginRequest(username, password);
+        return communicator.makeRequest(serverURL, "POST", "/session", request, null, LoginResult.class);
     }
 }

@@ -42,7 +42,26 @@ public class ServerFacadeTests {
     @Test
     public void testServerFacadeInvalidRegister() {
         serverFacade.register("name", "password", "email@gmail.com");
-        Assertions.assertThrows(ResponseException.class, () -> serverFacade.register("name", "a", "a"));
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.register("name", "a", "a"));
+        Assertions.assertEquals(403, e.getCode());
+    }
+
+    @Test
+    public void testServerFacadeValidLogin() {
+        serverFacade.register("name", "password", "email@gmail.com");
+        LoginResult result = serverFacade.login("name", "password");
+        Assertions.assertEquals("name", result.username());
+        Assertions.assertNotNull(result.authToken());
+        Assertions.assertTrue(result.authToken().length() > 10);
+    }
+
+    @Test
+    public void testServerFacadeInvalidLogin() {
+        serverFacade.register("name", "password", "email@gmail.com");
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.login("name", "badPassword"));
+        Assertions.assertEquals(401, e.getCode());
     }
 
 }
