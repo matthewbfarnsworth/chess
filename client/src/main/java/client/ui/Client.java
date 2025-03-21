@@ -23,41 +23,66 @@ public class Client {
         facade = new ServerFacade(serverURL);
     }
 
+    private String getFirstString() {
+        String line = new Scanner(System.in).next();
+        var tokens = line.toLowerCase().split(" ");
+        return (tokens.length > 0) ? tokens[0] : "";
+    }
+
     public void run() {
         System.out.println("CS 240 CHESS");
         System.out.println("Running on " + serverURL + "\n");
         helpLoggedOut();
 
-        Scanner scanner = new Scanner(System.in);
         while (!quit) {
             System.out.print("\n>>> ");
-            String line = scanner.nextLine();
+            String line = getFirstString();
 
             eval(line);
         }
     }
 
     private void eval(String input) {
-        var tokens = input.toLowerCase().split(" ");
-        var cmd = (tokens.length > 0) ? tokens[0] : "help";
-        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
         if (state == State.LOGGED_OUT) {
-            switch (cmd) {
+            switch (input) {
+                case "login" -> login();
                 case "register" -> register();
                 case "quit" -> quit();
                 default -> helpLoggedOut();
             }
         }
         else if (state == State.LOGGED_IN) {
-            switch (cmd) {
+            switch (input) {
                 case "quit" -> quit();
                 default -> helpLoggedIn();
             }
         }
     }
 
-    private String getFirstString() {
-        return new Scanner(System.in).next();
+    private void login() {
+        System.out.println("Logging in:");
+
+        System.out.print("\nEnter username >>> ");
+        String username = getFirstString();
+
+        System.out.print("\nEnter password >>> ");
+        String password = getFirstString();
+
+        System.out.println();
+        try {
+            var result = facade.login(username, password);
+            authToken = result.authToken();
+            state = State.LOGGED_IN;
+            System.out.println("Successfully logged in as user " + result.username());
+            helpLoggedIn();
+        }
+        catch (ResponseException e) {
+            if (e.getCode() == 401) {
+                System.out.println("Invalid username or password. Failed to log in.");
+            } else {
+                System.out.println("An unexpected error occurred. Failed to log in.");
+            }
+        }
     }
 
     private void register() {
