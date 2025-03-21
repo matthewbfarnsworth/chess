@@ -64,4 +64,19 @@ public class ServerFacadeTests {
         Assertions.assertEquals(401, e.getCode());
     }
 
+    @Test
+    public void testServerFacadeValidLogout() {
+        RegisterResult registerResult = serverFacade.register("name", "password", "email@gmail.com");
+        String authToken = registerResult.authToken();
+        Assertions.assertDoesNotThrow(() -> serverFacade.logout(authToken));
+    }
+
+    @Test
+    public void testServerFacadeInvalidLogout() {
+        serverFacade.register("name", "password", "email@gmail.com");
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.logout("a"));
+        Assertions.assertEquals(401, e.getCode());
+    }
+
 }

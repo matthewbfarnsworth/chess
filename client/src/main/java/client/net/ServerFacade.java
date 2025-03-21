@@ -1,9 +1,6 @@
 package client.net;
 
-import service.LoginRequest;
-import service.LoginResult;
-import service.RegisterRequest;
-import service.RegisterResult;
+import service.*;
 
 public class ServerFacade {
     private final String serverURL;
@@ -26,5 +23,9 @@ public class ServerFacade {
     public LoginResult login(String username, String password) throws ResponseException {
         LoginRequest request = new LoginRequest(username, password);
         return communicator.makeRequest(serverURL, "POST", "/session", request, null, LoginResult.class);
+    }
+
+    public void logout(String authToken) throws ResponseException {
+        communicator.makeRequest(serverURL, "DELETE", "/session", null, authToken, null);
     }
 }

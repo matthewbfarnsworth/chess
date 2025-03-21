@@ -36,10 +36,10 @@ public class ClientCommunicator {
 
     private static void writeBody(Object request, String authToken, HttpURLConnection httpURLConnection)
             throws IOException {
+        if (authToken != null) {
+            httpURLConnection.addRequestProperty("authorization", authToken);
+        }
         if (request != null) {
-            if (authToken != null) {
-                httpURLConnection.addRequestProperty("authorization", authToken);
-            }
             httpURLConnection.addRequestProperty("Content-Type", "application/json");
             String requestData = new Gson().toJson(request);
             try (OutputStream requestBody = httpURLConnection.getOutputStream()) {
