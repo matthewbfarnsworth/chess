@@ -1,4 +1,4 @@
-import ui.Client;
+import client.ui.Client;
 
 public class Main {
     public static void main(String[] args) {

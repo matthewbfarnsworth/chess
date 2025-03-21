@@ -1,10 +1,10 @@
-package ui;
+package client.ui;
 
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-import static ui.EscapeSequences.*;
+import static client.ui.EscapeSequences.*;
 
 public class ChessBoard {
 

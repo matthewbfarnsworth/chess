@@ -1,4 +1,4 @@
-package ui;
+package client.ui;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -7,6 +7,7 @@ public class Client {
     private final String serverURL;
     private final State state = State.LOGGED_OUT;
     private boolean quit = false;
+    private String authToken;
 
     private enum State {
         LOGGED_OUT,
@@ -20,6 +21,7 @@ public class Client {
     public void run() {
         System.out.println("CS 240 CHESS\n");
         System.out.println("Running on " + serverURL + "\n");
+        new ChessBoard().printBoard(new chess.ChessBoard(), true);
         help();
 
         Scanner scanner = new Scanner(System.in);
