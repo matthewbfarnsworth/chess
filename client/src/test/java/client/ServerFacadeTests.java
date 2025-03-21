@@ -79,4 +79,19 @@ public class ServerFacadeTests {
         Assertions.assertEquals(401, e.getCode());
     }
 
+    @Test
+    public void testServerFacadeValidCreateGame() {
+        RegisterResult registerResult = serverFacade.register("name", "password", "email@gmail.com");
+        String authToken = registerResult.authToken();
+        CreateGameResult result = serverFacade.createGame(authToken, "game");
+        Assertions.assertTrue(result.gameID() > 0);
+    }
+
+    @Test
+    public void testServerFacadeInvalidCreateGame() {
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.createGame("a", "game"));
+        Assertions.assertEquals(401, e.getCode());
+    }
+
 }

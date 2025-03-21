@@ -28,4 +28,9 @@ public class ServerFacade {
     public void logout(String authToken) throws ResponseException {
         communicator.makeRequest(serverURL, "DELETE", "/session", null, authToken, null);
     }
+
+    public CreateGameResult createGame(String authToken, String gameName) throws ResponseException {
+        CreateGameRequest request = new CreateGameRequest(gameName);
+        return communicator.makeRequest(serverURL, "POST", "/game", request, authToken, CreateGameResult.class);
+    }
 }
