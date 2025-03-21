@@ -6,6 +6,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import service.*;
 
+import java.util.List;
+
 
 public class ServerFacadeTests {
 
@@ -76,6 +78,27 @@ public class ServerFacadeTests {
         serverFacade.register("name", "password", "email@gmail.com");
         ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
                 serverFacade.logout("a"));
+        Assertions.assertEquals(401, e.getCode());
+    }
+
+    @Test
+    public void testServerFacadeValidListGames() {
+        RegisterResult registerResult = serverFacade.register("name", "password", "email@gmail.com");
+        String authToken = registerResult.authToken();
+        int gameID1 = serverFacade.createGame(authToken, "game1").gameID();
+        int gameID2 = serverFacade.createGame(authToken, "game2").gameID();
+        int gameID3 = serverFacade.createGame(authToken, "game3").gameID();
+        List<ListedGame> result = serverFacade.listGames(authToken).games();
+        Assertions.assertEquals(3, result.size());
+        Assertions.assertEquals(new ListedGame(gameID1, null, null, "game1"), result.get(0));
+        Assertions.assertEquals(new ListedGame(gameID2, null, null, "game2"), result.get(1));
+        Assertions.assertEquals(new ListedGame(gameID3, null, null, "game3"), result.get(2));
+    }
+
+    @Test
+    public void testServerFacadeInvalidListGames() {
+        ResponseException e = Assertions.assertThrows(ResponseException.class, () ->
+                serverFacade.listGames("a"));
         Assertions.assertEquals(401, e.getCode());
     }
 

@@ -29,6 +29,10 @@ public class ServerFacade {
         communicator.makeRequest(serverURL, "DELETE", "/session", null, authToken, null);
     }
 
+    public ListGamesResult listGames(String authToken) throws ResponseException {
+        return communicator.makeRequest(serverURL, "GET", "/game", null, authToken, ListGamesResult.class);
+    }
+
     public CreateGameResult createGame(String authToken, String gameName) throws ResponseException {
         CreateGameRequest request = new CreateGameRequest(gameName);
         return communicator.makeRequest(serverURL, "POST", "/game", request, authToken, CreateGameResult.class);
