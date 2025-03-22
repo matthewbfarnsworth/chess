@@ -1,5 +1,6 @@
 package client.ui;
 
+import chess.ChessGame;
 import client.net.ResponseException;
 import client.net.ServerFacade;
 import service.ListedGame;
@@ -15,7 +16,7 @@ public class Client {
     private State state = State.LOGGED_OUT;
     private boolean quit = false;
     private String authToken;
-    private Map<Integer, Integer> gameNumbers;
+    private Map<Integer, Integer> gameIDMap;
 
     private enum State {
         LOGGED_OUT,
@@ -31,6 +32,10 @@ public class Client {
         String line = new Scanner(System.in).next();
         var tokens = line.toLowerCase().split(" ");
         return (tokens.length > 0) ? tokens[0] : "";
+    }
+
+    private String getFullLine() {
+        return new Scanner(System.in).nextLine();
     }
 
     public void run() {
@@ -59,6 +64,7 @@ public class Client {
             switch (input) {
                 case "create" -> create();
                 case "list" -> list();
+                case "join" -> join();
                 case "logout" -> logout();
                 case "quit" -> quitLoggedIn();
                 default -> helpLoggedIn();
@@ -143,7 +149,7 @@ public class Client {
         System.out.println("Creating a new game:");
 
         System.out.print("\nEnter game name >>> ");
-        String gameName = getFirstString();
+        String gameName = getFullLine();
 
         System.out.println();
         try {
@@ -172,7 +178,7 @@ public class Client {
 
         try {
             var games = facade.listGames(authToken).games();
-            gameNumbers = mapNumbersToGameIDs(games);
+            gameIDMap = mapNumbersToGameIDs(games);
             for (int i = 0; i < games.size(); i++) {
                 var game = games.get(i);
                 System.out.print(i + 1);
@@ -197,6 +203,53 @@ public class Client {
                 System.out.println("You are no longer logged in. Failed to list games.");
             } else {
                 System.out.println("An unexpected error occurred. Failed to list games.");
+            }
+        }
+    }
+
+    private void join() {
+        System.out.println("Joining a game:");
+
+        System.out.print("\nEnter game number >>> ");
+        String gameNumberString = getFirstString();
+        int gameNumber = 0;
+        try {
+            gameNumber = Integer.parseInt(gameNumberString);
+            if (gameIDMap == null || gameIDMap.get(gameNumber) == null) {
+                System.out.println("Invalid game number. Failed to join game.");
+                return;
+            }
+        }
+        catch (NumberFormatException e) {
+            System.out.println("Invalid game number. Failed to join game.");
+            return;
+        }
+
+        System.out.print("\nSelect player color (white/black) >>> ");
+        String color = getFirstString();
+        if (!color.equals("white") && !color.equals("black")) {
+            System.out.println("Invalid color. Failed to join game.");
+            return;
+        }
+
+        System.out.println();
+        try {
+            if (color.equals("white")) {
+                color = "WHITE";
+            }
+            else {
+                color = "BLACK";
+            }
+            facade.joinGame(authToken, color, gameIDMap.get(gameNumber));
+            System.out.println("Successfully joined the game.");
+            new ChessBoard().printBoard(new ChessGame().getBoard(), color.equals("WHITE"));
+        }
+        catch (ResponseException e) {
+            switch (e.getCode()) {
+                case 400 -> System.out.println("Invalid request. Failed to join game.");
+                case 401 -> System.out.println("You are no longer logged in. Failed to join game.");
+                case 403 -> System.out.println("Already taken. Failed to join game.");
+                default -> System.out.println("An unexpected error occurred. Failed to create game.");
             }
         }
     }
