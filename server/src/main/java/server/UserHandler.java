@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
+import model.*;
 import service.*;
 import spark.*;
 

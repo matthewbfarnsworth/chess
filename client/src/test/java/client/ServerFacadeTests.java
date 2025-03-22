@@ -2,9 +2,12 @@ package client;
 
 import client.net.ResponseException;
 import client.net.ServerFacade;
+import model.CreateGameResult;
+import model.ListedGame;
+import model.LoginResult;
+import model.RegisterResult;
 import org.junit.jupiter.api.*;
 import server.Server;
-import service.*;
 
 import java.util.List;
 

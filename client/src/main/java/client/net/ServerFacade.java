@@ -1,6 +1,6 @@
 package client.net;
 
-import service.*;
+import model.*;
 
 public class ServerFacade {
     private final String serverURL;

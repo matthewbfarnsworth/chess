@@ -3,7 +3,7 @@ package client.ui;
 import chess.ChessGame;
 import client.net.ResponseException;
 import client.net.ServerFacade;
-import service.ListedGame;
+import model.ListedGame;
 
 import java.util.HashMap;
 import java.util.List;
