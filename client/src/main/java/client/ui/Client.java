@@ -65,6 +65,7 @@ public class Client {
                 case "create" -> create();
                 case "list" -> list();
                 case "join" -> join();
+                case "observe" -> observe();
                 case "logout" -> logout();
                 case "quit" -> quitLoggedIn();
                 default -> helpLoggedIn();
@@ -212,7 +213,7 @@ public class Client {
 
         System.out.print("\nEnter game number >>> ");
         String gameNumberString = getFirstString();
-        int gameNumber = 0;
+        int gameNumber;
         try {
             gameNumber = Integer.parseInt(gameNumberString);
             if (gameIDMap == null || gameIDMap.get(gameNumber) == null) {
@@ -249,9 +250,32 @@ public class Client {
                 case 400 -> System.out.println("Invalid request. Failed to join game.");
                 case 401 -> System.out.println("You are no longer logged in. Failed to join game.");
                 case 403 -> System.out.println("Already taken. Failed to join game.");
-                default -> System.out.println("An unexpected error occurred. Failed to create game.");
+                default -> System.out.println("An unexpected error occurred. Failed to join game.");
             }
         }
+    }
+
+    private void observe() {
+        System.out.println("Observing a game:");
+
+        System.out.print("\nEnter game number >>> ");
+        String gameNumberString = getFirstString();
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(gameNumberString);
+            if (gameIDMap == null || gameIDMap.get(gameNumber) == null) {
+                System.out.println("Invalid game number. Failed to join game as observer.");
+                return;
+            }
+        }
+        catch (NumberFormatException e) {
+            System.out.println("Invalid game number. Failed to join game as observer.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("Successfully joined the game as observer.");
+        new ChessBoard().printBoard(new ChessGame().getBoard(), true);
     }
 
     private void logout() {
@@ -266,9 +290,9 @@ public class Client {
         }
         catch (ResponseException e) {
             if (e.getCode() == 401) {
-                System.out.println("Invalid username or password. Failed to log in.");
+                System.out.println("Invalid username or password. Failed to log out.");
             } else {
-                System.out.println("An unexpected error occurred. Failed to log in.");
+                System.out.println("An unexpected error occurred. Failed to log out.");
             }
         }
     }
