@@ -20,7 +20,10 @@ public class Client {
 
     private enum State {
         LOGGED_OUT,
-        LOGGED_IN
+        LOGGED_IN,
+        GAMEPLAY_WHITE,
+        GAMEPLAY_BLACK,
+        OBSERVE
     }
 
     public Client(String serverURL) {
@@ -69,6 +72,18 @@ public class Client {
                 case "logout" -> logout();
                 case "quit" -> quitLoggedIn();
                 default -> helpLoggedIn();
+            }
+        }
+        else if (state == State.GAMEPLAY_WHITE || state == State.GAMEPLAY_BLACK) {
+            switch (input) {
+                case "redraw" -> redrawGameplay();
+                default -> helpGameplay();
+            }
+        }
+        else if (state == State.OBSERVE) {
+            switch (input) {
+                case "redraw" -> redrawObserve();
+                default -> helpObserve();
             }
         }
     }
@@ -237,13 +252,16 @@ public class Client {
         try {
             if (color.equals("white")) {
                 color = "WHITE";
+                state = State.GAMEPLAY_WHITE;
             }
             else {
                 color = "BLACK";
+                state = State.GAMEPLAY_BLACK;
             }
             facade.joinGame(authToken, color, gameIDMap.get(gameNumber));
             System.out.println("Successfully joined the game.");
-            new ChessBoard().printBoard(new ChessGame(), color.equals("WHITE"));
+            new ChessBoard().printBoard(new ChessGame(), state.equals(State.GAMEPLAY_WHITE));
+            helpGameplay();
         }
         catch (ResponseException e) {
             switch (e.getCode()) {
@@ -276,6 +294,7 @@ public class Client {
         System.out.println();
         System.out.println("Successfully joined the game as observer.");
         new ChessBoard().printBoard(new ChessGame(), true);
+        helpObserve();
     }
 
     private void logout() {
@@ -316,5 +335,33 @@ public class Client {
                 -> logout
                 -> quit
                 -> help""");
+    }
+
+    private void redrawGameplay() {
+        new ChessBoard().printBoard(new ChessGame(), state.equals(State.GAMEPLAY_WHITE));
+    }
+
+    private void helpGameplay() {
+        System.out.println("""
+                -> redraw
+                -> leave
+                -> move
+                -> resign
+                -> highlight
+                -> help
+                """);
+    }
+
+    private void redrawObserve() {
+        new ChessBoard().printBoard(new ChessGame(), true);
+    }
+
+    private void helpObserve() {
+        System.out.println("""
+                -> redraw
+                -> leave
+                -> highlight
+                -> help
+                """);
     }
 }
