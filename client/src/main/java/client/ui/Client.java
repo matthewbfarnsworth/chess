@@ -243,7 +243,7 @@ public class Client {
             }
             facade.joinGame(authToken, color, gameIDMap.get(gameNumber));
             System.out.println("Successfully joined the game.");
-            new ChessBoard().printBoard(new ChessGame().getBoard(), color.equals("WHITE"));
+            new ChessBoard().printBoard(new ChessGame(), color.equals("WHITE"));
         }
         catch (ResponseException e) {
             switch (e.getCode()) {
@@ -275,7 +275,7 @@ public class Client {
 
         System.out.println();
         System.out.println("Successfully joined the game as observer.");
-        new ChessBoard().printBoard(new ChessGame().getBoard(), true);
+        new ChessBoard().printBoard(new ChessGame(), true);
     }
 
     private void logout() {

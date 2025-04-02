@@ -1,8 +1,8 @@
 package client.ui;
 
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.Collection;
 
 import static client.ui.EscapeSequences.*;
 
@@ -12,6 +12,8 @@ public class ChessBoard {
     private static final String BORDER_COLOR = SET_BG_COLOR_DARK_GREEN;
     private static final String LIGHT_TILE = SET_BG_COLOR_WHITE;
     private static final String DARK_TILE = SET_BG_COLOR_LIGHT_GREY;
+    private static final String HIGHLIGHTED_LIGHT_TILE = SET_BG_COLOR_LIGHT_BLUE;
+    private static final String HIGHLIGHTED_DARK_TILE = SET_BG_COLOR_BLUE;
     private static final String TEXT_COLOR = SET_TEXT_COLOR_WHITE;
     private static final String PIECE_COLOR = SET_TEXT_COLOR_BLACK;
 
@@ -77,8 +79,14 @@ public class ChessBoard {
         System.out.println();
     }
 
-    private void printTile(chess.ChessBoard board, int row, int col) {
-        String tileColor = (row + col) % 2 == 0 ? DARK_TILE : LIGHT_TILE;
+    private void printTile(chess.ChessBoard board, boolean[][] highlightedTiles, int row, int col) {
+        String tileColor;
+        if (highlightedTiles[row - 1][col - 1]) {
+            tileColor = (row + col) % 2 == 0 ? HIGHLIGHTED_DARK_TILE : HIGHLIGHTED_LIGHT_TILE;
+        }
+        else {
+            tileColor = (row + col) % 2 == 0 ? DARK_TILE : LIGHT_TILE;
+        }
         ChessPiece piece = board.getPiece(new ChessPosition(row, col));
         if (piece == null) {
             printBlock(EMPTY, tileColor, PIECE_COLOR);
@@ -88,32 +96,54 @@ public class ChessBoard {
         }
     }
 
-    private void printChessRow(chess.ChessBoard board, int row, boolean isWhite) {
+    private void printChessRow(chess.ChessBoard board, boolean[][] highlightedTiles, int row, boolean isWhite) {
         printBlock(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
         if (isWhite) {
             for (int col = 1; col <= BOARD_SIZE; col++) {
-                printTile(board, row, col);
+                printTile(board, highlightedTiles, row, col);
             }
         }
         else {
             for (int col = BOARD_SIZE; col >= 1; col--) {
-                printTile(board, row, col);
+                printTile(board, highlightedTiles, row, col);
             }
         }
         printBlock(" " + row + EM_SPACE, BORDER_COLOR, TEXT_COLOR);
         System.out.println();
     }
 
-    public void printBoard(chess.ChessBoard board, boolean isWhite) {
+    private boolean[][] getHighlightedMoveTiles(ChessGame game, chess.ChessPosition startPosition) {
+        boolean[][] highlightedBoard = new boolean[BOARD_SIZE][BOARD_SIZE];
+        if (startPosition != null) {
+            int startRow = startPosition.getRow();
+            int startCol = startPosition.getColumn();
+            highlightedBoard[startRow - 1][startCol - 1] = true;
+            Collection<ChessMove> validMoves = game.validMoves(startPosition);
+            for (chess.ChessMove move : validMoves) {
+                ChessPosition endPosition = move.getEndPosition();
+                int endRow = endPosition.getRow();
+                int endCol = endPosition.getColumn();
+                highlightedBoard[endRow - 1][endCol - 1] = true;
+            }
+        }
+        return highlightedBoard;
+    }
+
+    public void printBoard(ChessGame game, boolean isWhite) {
+        printBoard(game, null, isWhite);
+    }
+
+    public void printBoard(ChessGame game, ChessPosition position, boolean isWhite) {
         printHeader(isWhite);
+        boolean[][] highlightedTiles = getHighlightedMoveTiles(game, position);
         if (isWhite) {
             for (int i = BOARD_SIZE; i >= 1; i--) {
-                printChessRow(board, i, true);
+                printChessRow(game.getBoard(), highlightedTiles, i, true);
             }
         }
         else {
             for (int i = 1; i <= BOARD_SIZE; i++) {
-                printChessRow(board, i, false);
+                printChessRow(game.getBoard(), highlightedTiles, i, false);
             }
         }
         printHeader(isWhite);
