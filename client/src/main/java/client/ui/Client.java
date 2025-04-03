@@ -4,20 +4,27 @@ import chess.ChessGame;
 import chess.ChessPosition;
 import client.net.ResponseException;
 import client.net.ServerFacade;
+import client.net.ServerMessageObserver;
 import model.ListedGame;
+import websocket.messages.ErrorServerMessage;
+import websocket.messages.LoadGameServerMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Client {
+public class Client implements ServerMessageObserver {
     private final String serverURL;
     private final ServerFacade facade;
+
     private State state = State.LOGGED_OUT;
     private boolean quit = false;
     private String authToken;
     private Map<Integer, Integer> gameIDMap;
+    private ChessGame game;
 
     private enum State {
         LOGGED_OUT,
@@ -29,7 +36,7 @@ public class Client {
 
     public Client(String serverURL) {
         this.serverURL = serverURL;
-        facade = new ServerFacade(serverURL);
+        facade = new ServerFacade(serverURL, this);
     }
 
     private String getFirstString() {
@@ -392,5 +399,27 @@ public class Client {
                 -> highlight
                 -> help
                 """);
+    }
+
+    private void loadGame(ChessGame game) {
+        this.game = game;
+        new ChessBoard().printBoard(game, !state.equals(State.GAMEPLAY_BLACK));
+    }
+
+    private void error(String errorMessage) {
+        System.out.println("Error: " + errorMessage);
+    }
+
+    private void notification(String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> loadGame(((LoadGameServerMessage) message).getGame());
+            case ERROR -> error(((ErrorServerMessage) message).getErrorMessage());
+            case NOTIFICATION -> notification(((NotificationMessage) message).getMessage());
+        }
     }
 }

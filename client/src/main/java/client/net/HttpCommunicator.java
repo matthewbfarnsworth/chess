@@ -11,7 +11,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class ClientCommunicator {
+public class HttpCommunicator {
 
     public <T> T makeRequest(String serverURL, String method, String path, Object request, String authToken,
                               Class<T> responseClass) throws ResponseException {

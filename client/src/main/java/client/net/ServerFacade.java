@@ -4,10 +4,12 @@ import model.*;
 
 public class ServerFacade {
     private final String serverURL;
-    private final ClientCommunicator communicator = new ClientCommunicator();
+    private final ServerMessageObserver serverMessageObserver;
+    private final HttpCommunicator communicator = new HttpCommunicator();
 
-    public ServerFacade(String serverURL) {
+    public ServerFacade(String serverURL, ServerMessageObserver serverMessageObserver) {
         this.serverURL = serverURL;
+        this.serverMessageObserver = serverMessageObserver;
     }
 
     public void clear() throws ResponseException {
