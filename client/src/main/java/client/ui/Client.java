@@ -1,6 +1,7 @@
 package client.ui;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import client.net.ResponseException;
 import client.net.ServerFacade;
 import model.ListedGame;
@@ -77,12 +78,14 @@ public class Client {
         else if (state == State.GAMEPLAY_WHITE || state == State.GAMEPLAY_BLACK) {
             switch (input) {
                 case "redraw" -> redrawGameplay();
+                case "highlight" -> highlight();
                 default -> helpGameplay();
             }
         }
         else if (state == State.OBSERVE) {
             switch (input) {
                 case "redraw" -> redrawObserve();
+                case "highlight" -> highlight();
                 default -> helpObserve();
             }
         }
@@ -337,8 +340,34 @@ public class Client {
                 -> help""");
     }
 
+    private ChessPosition stringToChessPosition(String input) throws InvalidPositionException {
+        if (input.length() != 2) {
+            throw new InvalidPositionException("Invalid position.");
+        }
+        char firstChar = input.charAt(0);
+        if (firstChar < 'a' || firstChar > 'h') {
+            throw new InvalidPositionException("Invalid position.");
+        }
+        char secondChar = input.charAt(1);
+        if (secondChar < '1' || secondChar > '8') {
+            throw new InvalidPositionException("Invalid position.");
+        }
+        return new ChessPosition(Character.getNumericValue(secondChar), firstChar - 'a' + 1);
+    }
+
     private void redrawGameplay() {
         new ChessBoard().printBoard(new ChessGame(), state.equals(State.GAMEPLAY_WHITE));
+    }
+
+    private void highlight() {
+        System.out.print("\nEnter position to highlight legal moves on >>> ");
+        try {
+            ChessPosition highlightPosition = stringToChessPosition(getFirstString());
+            new ChessBoard().printBoard(new ChessGame(), highlightPosition, !state.equals(State.GAMEPLAY_BLACK));
+        }
+        catch (InvalidPositionException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void helpGameplay() {

@@ -119,11 +119,13 @@ public class ChessBoard {
             int startCol = startPosition.getColumn();
             highlightedBoard[startRow - 1][startCol - 1] = true;
             Collection<ChessMove> validMoves = game.validMoves(startPosition);
-            for (chess.ChessMove move : validMoves) {
-                ChessPosition endPosition = move.getEndPosition();
-                int endRow = endPosition.getRow();
-                int endCol = endPosition.getColumn();
-                highlightedBoard[endRow - 1][endCol - 1] = true;
+            if (validMoves != null) {
+                for (chess.ChessMove move : validMoves) {
+                    ChessPosition endPosition = move.getEndPosition();
+                    int endRow = endPosition.getRow();
+                    int endCol = endPosition.getColumn();
+                    highlightedBoard[endRow - 1][endCol - 1] = true;
+                }
             }
         }
         return highlightedBoard;
