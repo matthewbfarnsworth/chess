@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessGameSerializer;
 import model.GameData;
 
 import java.sql.ResultSet;
@@ -30,7 +31,7 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
         var serializedGame = rs.getString("game");
-        ChessGame game = new ChessGameSerializer().stringToChessGame(serializedGame);
+        ChessGame game = ChessGameSerializer.deserialize(serializedGame);
         return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
@@ -59,7 +60,7 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
             var statement = "INSERT INTO gameData (gameName, game) VALUES (?, ?)";
             try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, gameName);
-                ps.setString(2, new ChessGameSerializer().chessGameToString(new ChessGame()));
+                ps.setString(2, ChessGameSerializer.serialize(new ChessGame()));
                 ps.executeUpdate();
                 try (var rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
