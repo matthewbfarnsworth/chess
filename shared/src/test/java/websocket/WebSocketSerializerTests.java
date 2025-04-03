@@ -1,10 +1,15 @@
 package websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import websocket.commands.*;
+import websocket.messages.ErrorServerMessage;
+import websocket.messages.LoadGameServerMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 public class WebSocketSerializerTests {
     @Test
@@ -42,5 +47,29 @@ public class WebSocketSerializerTests {
         UserGameCommand deserializedCommand = WebSocketSerializer.deserialize(serializedCommand,
                 UserGameCommand.class);
         Assertions.assertEquals(command, (ResignGameCommand) deserializedCommand);
+    }
+
+    @Test
+    public void testLoadGameServerMessageSerialization() {
+        LoadGameServerMessage message = new LoadGameServerMessage(new ChessGame());
+        String serializedMessage = WebSocketSerializer.serialize(message);
+        ServerMessage deserializedCommand = WebSocketSerializer.deserialize(serializedMessage, ServerMessage.class);
+        Assertions.assertEquals(message, (LoadGameServerMessage) deserializedCommand);
+    }
+
+    @Test
+    public void testErrorServerMessageSerialization() {
+        ErrorServerMessage message = new ErrorServerMessage("a");
+        String serializedMessage = WebSocketSerializer.serialize(message);
+        ServerMessage deserializedCommand = WebSocketSerializer.deserialize(serializedMessage, ServerMessage.class);
+        Assertions.assertEquals(message, (ErrorServerMessage) deserializedCommand);
+    }
+
+    @Test
+    public void testNotificationServerMessageSerialization() {
+        NotificationMessage message = new NotificationMessage("a");
+        String serializedMessage = WebSocketSerializer.serialize(message);
+        ServerMessage deserializedCommand = WebSocketSerializer.deserialize(serializedMessage, ServerMessage.class);
+        Assertions.assertEquals(message, (NotificationMessage) deserializedCommand);
     }
 }
