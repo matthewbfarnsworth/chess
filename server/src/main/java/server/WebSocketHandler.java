@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.ServiceException;
 import websocket.WebSocketSerializer;
 import websocket.commands.ConnectGameCommand;
+import websocket.commands.LeaveGameCommand;
 import websocket.commands.MakeMoveGameCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorServerMessage;
@@ -48,6 +49,7 @@ public class WebSocketHandler {
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, (ConnectGameCommand) command);
                 case MAKE_MOVE -> makeMove(session, username, (MakeMoveGameCommand) command);
+                case LEAVE -> leave(session, username, (LeaveGameCommand) command);
             }
         }
         catch (ServiceException e) {
@@ -220,5 +222,22 @@ public class WebSocketHandler {
             notify(gameID, nextTeamName + " is in check");
         }
 
+    }
+
+    private void leave(Session session, String username, LeaveGameCommand command) throws ServiceException {
+        GameData gameData = getGameData(command.getGameID());
+        try {
+            if (username.equals(gameData.whiteUsername())) {
+                gameDAO.updateGame(command.getGameID(), null, GameDAO.Color.WHITE);
+            }
+            else if (username.equals(gameData.blackUsername())) {
+                gameDAO.updateGame(command.getGameID(), null, GameDAO.Color.BLACK);
+            }
+        }
+        catch (DataAccessException e) {
+            throw new ServiceException(e.getMessage(), 500);
+        }
+        notify(username, command.getGameID(), username + " has left the game");
+        session.close();
     }
 }
