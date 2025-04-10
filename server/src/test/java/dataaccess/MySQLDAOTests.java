@@ -1,6 +1,8 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -288,6 +290,36 @@ public class MySQLDAOTests {
             Assertions.assertEquals(expected, gameDAO.getGame(gameID));
         }
         catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidReplaceGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            ChessMove move = new ChessMove(new ChessPosition(2, 2), new ChessPosition(4, 2), null);
+            ChessGame newGame = new ChessGame();
+            newGame.makeMove(move);
+            gameDAO.replaceGame(gameID, newGame);
+            Assertions.assertEquals(newGame, gameDAO.getGame(gameID).game());
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidReplaceGame() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            ChessMove move = new ChessMove(new ChessPosition(2, 2), new ChessPosition(4, 2), null);
+            ChessGame newGame = new ChessGame();
+            newGame.makeMove(move);
+            gameDAO.replaceGame(gameID + 1, newGame);
+            Assertions.assertEquals(new ChessGame(), gameDAO.getGame(gameID).game());
+        }
+        catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }

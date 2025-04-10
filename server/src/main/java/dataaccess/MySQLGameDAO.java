@@ -113,4 +113,19 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    @Override
+    public void replaceGame(int gameID, ChessGame game) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE gameData SET game=? WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, ChessGameSerializer.serialize(game));
+                ps.setInt(2, gameID);
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 }

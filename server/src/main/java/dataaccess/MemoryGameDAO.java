@@ -75,4 +75,17 @@ public class MemoryGameDAO implements GameDAO {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    @Override
+    public void replaceGame(int gameID, ChessGame game) throws DataAccessException {
+        try {
+            GameData oldGame = gameDataMap.get(gameID);
+            GameData newGame = new GameData(gameID, oldGame.whiteUsername(), oldGame.blackUsername(),
+                    oldGame.gameName(), game);
+            gameDataMap.replace(gameID, newGame);
+        }
+        catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 }
