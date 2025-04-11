@@ -14,10 +14,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.ServiceException;
 import websocket.WebSocketSerializer;
-import websocket.commands.ConnectGameCommand;
-import websocket.commands.LeaveGameCommand;
-import websocket.commands.MakeMoveGameCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import websocket.messages.ErrorServerMessage;
 import websocket.messages.LoadGameServerMessage;
 import websocket.messages.NotificationMessage;
@@ -50,6 +47,7 @@ public class WebSocketHandler {
                 case CONNECT -> connect(session, username, (ConnectGameCommand) command);
                 case MAKE_MOVE -> makeMove(session, username, (MakeMoveGameCommand) command);
                 case LEAVE -> leave(session, username, (LeaveGameCommand) command);
+                case RESIGN -> resign(session, username, (ResignGameCommand) command);
             }
         }
         catch (ServiceException e) {
@@ -98,6 +96,15 @@ public class WebSocketHandler {
     private GameData getGameData(int gameID) throws ServiceException {
         try {
             return gameDAO.getGame(gameID);
+        }
+        catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage(), 500);
+        }
+    }
+
+    private void setGameOver(int gameID) throws ServiceException {
+        try {
+            gameDAO.setGameOver(gameID, true);
         }
         catch (DataAccessException e) {
             throw new ServiceException("Error: " + e.getMessage(), 500);
@@ -161,6 +168,10 @@ public class WebSocketHandler {
             throw new ServiceException("Error: Invalid game", 400);
         }
 
+        if (gameData.gameOver()) {
+            throw new ServiceException("Error: Game is over", 403);
+        }
+
         ChessGame.TeamColor teamTurn = gameData.game().getTeamTurn();
         if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
             throw new ServiceException("Error: Cannot make move as observer", 403);
@@ -213,9 +224,11 @@ public class WebSocketHandler {
         ChessGame.TeamColor nextTeamTurn = updatedGame.getTeamTurn();
         String nextTeamName = nextTeamTurn == ChessGame.TeamColor.WHITE ? "white" : "black";
         if (updatedGame.isInStalemate(nextTeamTurn)) {
+            setGameOver(gameID);
             notify(gameID, nextTeamName + " is in stalemate");
         }
         else if (updatedGame.isInCheckmate(nextTeamTurn)) {
+            setGameOver(gameID);
             notify(gameID, nextTeamName + " is in checkmate");
         }
         else if (updatedGame.isInCheck(nextTeamTurn)) {
@@ -239,5 +252,19 @@ public class WebSocketHandler {
         }
         notify(username, command.getGameID(), username + " has left the game");
         session.close();
+    }
+
+    private void resign(Session session, String username, ResignGameCommand command) throws ServiceException {
+        GameData gameData = getGameData(command.getGameID());
+        if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+            throw new ServiceException("Error: Cannot resign as observer", 403);
+        }
+
+        if (gameData.gameOver()) {
+            throw new ServiceException("Error: Game is over", 403);
+        }
+
+        setGameOver(command.getGameID());
+        notify(command.getGameID(), username + " has resigned");
     }
 }

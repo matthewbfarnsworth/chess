@@ -16,4 +16,5 @@ public interface GameDAO {
     }
     void updateGame(int gameID, String username, Color color) throws DataAccessException;
     void replaceGame(int gameID, ChessGame game) throws DataAccessException;
+    void setGameOver(int gameID, boolean gameOver) throws DataAccessException;
 }

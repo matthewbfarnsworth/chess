@@ -31,14 +31,16 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
         var serializedGame = rs.getString("game");
+        var gameOver = rs.getBoolean("gameOver");
         ChessGame game = ChessGameSerializer.deserialize(serializedGame);
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, game, gameOver);
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID=?";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game, gameOver FROM gameData" +
+                    " WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -81,7 +83,7 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
     public List<GameData> listGames() throws DataAccessException {
         var result = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM gameData";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game, gameOver FROM gameData";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -120,6 +122,21 @@ public class MySQLGameDAO extends MySQLDAO implements GameDAO {
             var statement = "UPDATE gameData SET game=? WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, ChessGameSerializer.serialize(game));
+                ps.setInt(2, gameID);
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void setGameOver(int gameID, boolean gameOver) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE gameData SET gameOver=? WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setBoolean(1, gameOver);
                 ps.setInt(2, gameID);
                 ps.executeUpdate();
             }

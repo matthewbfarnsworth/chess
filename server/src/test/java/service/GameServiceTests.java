@@ -100,7 +100,7 @@ public class GameServiceTests {
             JoinGameRequest request = new JoinGameRequest("WHITE", 1);
             gameService.joinGame("a", request);
             GameData gameData = gameDAO.getGame(1);
-            Assertions.assertEquals(new GameData(1, "username", null, "myGame", gameData.game()), gameData);
+            Assertions.assertEquals(new GameData(1, "username", null, "myGame", gameData.game(), false), gameData);
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);

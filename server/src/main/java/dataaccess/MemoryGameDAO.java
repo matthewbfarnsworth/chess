@@ -35,7 +35,7 @@ public class MemoryGameDAO implements GameDAO {
     public int createGame(String gameName) throws DataAccessException {
         try {
             int gameID = generateGameID();
-            gameDataMap.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame()));
+            gameDataMap.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame(), false));
             return gameID;
         }
         catch (Exception e) {
@@ -66,8 +66,10 @@ public class MemoryGameDAO implements GameDAO {
         try {
             GameData game = gameDataMap.get(gameID);
             GameData newGame = switch (color) {
-                case WHITE -> new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
-                case BLACK -> new GameData(gameID, game.whiteUsername(), username, game.gameName(),game.game());
+                case WHITE -> new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game(),
+                        game.gameOver());
+                case BLACK -> new GameData(gameID, game.whiteUsername(), username, game.gameName(),game.game(),
+                        game.gameOver());
             };
             gameDataMap.replace(gameID, newGame);
         }
@@ -81,8 +83,20 @@ public class MemoryGameDAO implements GameDAO {
         try {
             GameData oldGame = gameDataMap.get(gameID);
             GameData newGame = new GameData(gameID, oldGame.whiteUsername(), oldGame.blackUsername(),
-                    oldGame.gameName(), game);
+                    oldGame.gameName(), game, oldGame.gameOver());
             gameDataMap.replace(gameID, newGame);
+        }
+        catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void setGameOver(int gameID, boolean gameOver) throws DataAccessException {
+        try {
+            GameData oldGame = gameDataMap.get(gameID);
+            GameData newGame = new GameData(gameID, oldGame.whiteUsername(), oldGame.blackUsername(),
+                    oldGame.gameName(), oldGame.game(), gameOver);
         }
         catch (Exception e) {
             throw new DataAccessException(e.getMessage());

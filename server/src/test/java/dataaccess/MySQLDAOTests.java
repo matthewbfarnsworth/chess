@@ -200,7 +200,7 @@ public class MySQLDAOTests {
     public void testValidGetGame() {
         try {
             int gameID = gameDAO.createGame("game");
-            GameData gameData = new GameData(gameID, null, null, "game", new ChessGame());
+            GameData gameData = new GameData(gameID, null, null, "game", new ChessGame(), false);
             Assertions.assertEquals(gameData, gameDAO.getGame(gameID));
         }
         catch (DataAccessException e) {
@@ -222,9 +222,9 @@ public class MySQLDAOTests {
     public void testValidCreateGame() {
         try {
             int gameID1 = gameDAO.createGame("game");
-            GameData gameData1 = new GameData(gameID1, null, null, "game", new ChessGame());
+            GameData gameData1 = new GameData(gameID1, null, null, "game", new ChessGame(), false);
             int gameID2 = gameDAO.createGame("game2");
-            GameData gameData2 = new GameData(gameID2, null, null, "game2", new ChessGame());
+            GameData gameData2 = new GameData(gameID2, null, null, "game2", new ChessGame(), false);
             Assertions.assertEquals(gameData1, gameDAO.getGame(gameID1));
             Assertions.assertEquals(gameData2, gameDAO.getGame(gameID2));
         }
@@ -244,8 +244,8 @@ public class MySQLDAOTests {
             int gameID1 = gameDAO.createGame("game1");
             int gameID2 = gameDAO.createGame("game2");
             List<GameData> listedGames = gameDAO.listGames();
-            GameData game1 = new GameData(gameID1, null, null, "game1", new ChessGame());
-            GameData game2 = new GameData(gameID2, null, null, "game2", new ChessGame());
+            GameData game1 = new GameData(gameID1, null, null, "game1", new ChessGame(), false);
+            GameData game2 = new GameData(gameID2, null, null, "game2", new ChessGame(), false);
             List<GameData> expectedGames = new ArrayList<>();
             expectedGames.add(game1);
             expectedGames.add(game2);
@@ -273,7 +273,7 @@ public class MySQLDAOTests {
         try {
             int gameID = gameDAO.createGame("game");
             gameDAO.updateGame(gameID, "name", GameDAO.Color.WHITE);
-            GameData expected = new GameData(gameID, "name", null, "game", new ChessGame());
+            GameData expected = new GameData(gameID, "name", null, "game", new ChessGame(), false);
             Assertions.assertEquals(expected, gameDAO.getGame(gameID));
         }
         catch (DataAccessException e) {
@@ -286,7 +286,7 @@ public class MySQLDAOTests {
         try {
             int gameID = gameDAO.createGame("game");
             gameDAO.updateGame(gameID+1, "name2", GameDAO.Color.WHITE);
-            GameData expected = new GameData(gameID, null, null, "game", new ChessGame());
+            GameData expected = new GameData(gameID, null, null, "game", new ChessGame(), false);
             Assertions.assertEquals(expected, gameDAO.getGame(gameID));
         }
         catch (DataAccessException e) {
@@ -318,6 +318,32 @@ public class MySQLDAOTests {
             newGame.makeMove(move);
             gameDAO.replaceGame(gameID + 1, newGame);
             Assertions.assertEquals(new ChessGame(), gameDAO.getGame(gameID).game());
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidSetGameOver() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            gameDAO.setGameOver(gameID, true);
+            GameData expected = new GameData(gameID, null, null, "game", new ChessGame(), true);
+            Assertions.assertEquals(expected, gameDAO.getGame(gameID));
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidSetGameOver() {
+        try {
+            int gameID = gameDAO.createGame("game");
+            gameDAO.setGameOver(gameID + 1, true);
+            GameData expected = new GameData(gameID, null, null, "game", new ChessGame(), false);
+            Assertions.assertEquals(expected, gameDAO.getGame(gameID));
         }
         catch (Exception e) {
             throw new RuntimeException(e.getMessage());
