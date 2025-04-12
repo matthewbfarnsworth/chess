@@ -149,10 +149,10 @@ public class WebSocketHandler {
         gameSession.put(username, session);
         sendMessage(session, new LoadGameServerMessage(gameData.game()));
 
-        if (gameData.whiteUsername().equals(username)) {
+        if (gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)) {
             notify(username, gameID, username + " entered the game as white");
         }
-        else if (gameData.blackUsername().equals(username)) {
+        else if (gameData.blackUsername() != null &&gameData.blackUsername().equals(username)) {
             notify(username, gameID, username + " entered the game as black");
         }
         else {

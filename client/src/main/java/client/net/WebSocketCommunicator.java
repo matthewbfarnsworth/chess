@@ -1,6 +1,7 @@
 package client.net;
 
-import com.google.gson.Gson;
+import websocket.WebSocketSerializer;
+import websocket.messages.ErrorServerMessage;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -20,9 +21,17 @@ public class WebSocketCommunicator extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             session = container.connectToServer(this, socketURI);
 
-            session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-                ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                serverMessageObserver.notify(serverMessage);
+            session.addMessageHandler(new MessageHandler.Whole<String>() {
+                @Override
+                public void onMessage(String message) {
+                    try {
+                        ServerMessage serverMessage = WebSocketSerializer.deserialize(message, ServerMessage.class);
+                        serverMessageObserver.notify(serverMessage);
+                    }
+                    catch (Exception e) {
+                        serverMessageObserver.notify(new ErrorServerMessage(e.getMessage()));
+                    }
+                }
             });
         }
         catch (Exception e) {

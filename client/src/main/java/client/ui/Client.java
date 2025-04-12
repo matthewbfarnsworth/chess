@@ -25,6 +25,7 @@ public class Client implements ServerMessageObserver {
     private String authToken;
     private Map<Integer, Integer> gameIDMap;
     private ChessGame game;
+    private boolean loadGameRecieved = false;
 
     private enum State {
         LOGGED_OUT,
@@ -83,7 +84,7 @@ public class Client implements ServerMessageObserver {
             }
         }
         else if (state == State.GAMEPLAY_WHITE || state == State.GAMEPLAY_BLACK) {
-            switch (input) {
+             switch (input) {
                 case "redraw" -> redrawGameplay();
                 case "highlight" -> highlight();
                 default -> helpGameplay();
@@ -260,20 +261,16 @@ public class Client implements ServerMessageObserver {
 
         System.out.println();
         try {
-            if (color.equals("white")) {
-                color = "WHITE";
-                state = State.GAMEPLAY_WHITE;
-            }
-            else {
-                color = "BLACK";
-                state = State.GAMEPLAY_BLACK;
-            }
+            color = color.equals("white") ? "WHITE" : "BLACK";
+            state = color.equals("WHITE") ? State.GAMEPLAY_WHITE : State.GAMEPLAY_BLACK;
             facade.joinGame(authToken, color, gameIDMap.get(gameNumber));
+            facade.connect(authToken, gameIDMap.get(gameNumber));
+            waitForLoadGame();
             System.out.println("Successfully joined the game.");
-            new ChessBoard().printBoard(new ChessGame(), state.equals(State.GAMEPLAY_WHITE));
             helpGameplay();
         }
         catch (ResponseException e) {
+            state = State.LOGGED_IN;
             switch (e.getCode()) {
                 case 400 -> System.out.println("Invalid request. Failed to join game.");
                 case 401 -> System.out.println("You are no longer logged in. Failed to join game.");
@@ -300,11 +297,19 @@ public class Client implements ServerMessageObserver {
             System.out.println("Invalid game number. Failed to join game as observer.");
             return;
         }
-
         System.out.println();
-        System.out.println("Successfully joined the game as observer.");
-        new ChessBoard().printBoard(new ChessGame(), true);
-        helpObserve();
+
+        try {
+            state = State.OBSERVE;
+            facade.connect(authToken, gameIDMap.get(gameNumber));
+            waitForLoadGame();
+            System.out.println("Successfully joined the game as observer.");
+            helpObserve();
+        }
+        catch (ResponseException e) {
+            state = State.LOGGED_IN;
+            System.out.println("Failed to observe game.");
+        }
     }
 
     private void logout() {
@@ -363,7 +368,7 @@ public class Client implements ServerMessageObserver {
     }
 
     private void redrawGameplay() {
-        new ChessBoard().printBoard(new ChessGame(), state.equals(State.GAMEPLAY_WHITE));
+        new ChessBoard().printBoard(game, state.equals(State.GAMEPLAY_WHITE));
     }
 
     private void highlight() {
@@ -389,7 +394,7 @@ public class Client implements ServerMessageObserver {
     }
 
     private void redrawObserve() {
-        new ChessBoard().printBoard(new ChessGame(), true);
+        new ChessBoard().printBoard(game, true);
     }
 
     private void helpObserve() {
@@ -401,9 +406,26 @@ public class Client implements ServerMessageObserver {
                 """);
     }
 
+    private void waitForLoadGame() throws ResponseException {
+        loadGameRecieved = false;
+        int totalWaitTime = 0;
+        while (!loadGameRecieved && totalWaitTime < 1000) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new ResponseException(e.getMessage(), 500);
+            }
+            totalWaitTime += 100;
+        }
+        if (!loadGameRecieved) {
+            throw new ResponseException("Error: Request timed out", 408);
+        }
+    }
+
     private void loadGame(ChessGame game) {
         this.game = game;
         new ChessBoard().printBoard(game, !state.equals(State.GAMEPLAY_BLACK));
+        loadGameRecieved = true;
     }
 
     private void error(String errorMessage) {
