@@ -60,18 +60,7 @@ public class WebSocketHandler {
 
     @OnWebSocketClose
     public void onClose(Session session, int code, String message) {
-        for (int gameID : gameSessions.keySet()) {
-            var gameSession = gameSessions.get(gameID);
-            for (String username : gameSession.keySet()) {
-                if (gameSession.get(username) == session) {
-                    gameSession.remove(username);
-                    if (gameSession.isEmpty()) {
-                        gameSessions.remove(gameID);
-                    }
-                    return;
-                }
-            }
-        }
+        removeSession(session);
     }
 
     private String getUsername(String authToken) throws ServiceException {
@@ -237,6 +226,21 @@ public class WebSocketHandler {
 
     }
 
+    private void removeSession(Session session) {
+        for (int gameID : gameSessions.keySet()) {
+            var gameSession = gameSessions.get(gameID);
+            for (String username : gameSession.keySet()) {
+                if (gameSession.get(username) == session) {
+                    gameSession.remove(username);
+                    if (gameSession.isEmpty()) {
+                        gameSessions.remove(gameID);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
     private void leave(Session session, String username, LeaveGameCommand command) throws ServiceException {
         GameData gameData = getGameData(command.getGameID());
         try {
@@ -251,7 +255,7 @@ public class WebSocketHandler {
             throw new ServiceException(e.getMessage(), 500);
         }
         notify(username, command.getGameID(), username + " has left the game");
-        session.close();
+        removeSession(session);
     }
 
     private void resign(Session session, String username, ResignGameCommand command) throws ServiceException {

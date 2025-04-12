@@ -25,7 +25,8 @@ public class Client implements ServerMessageObserver {
     private String authToken;
     private Map<Integer, Integer> gameIDMap;
     private ChessGame game;
-    private boolean loadGameRecieved = false;
+    private int gameID;
+    private boolean loadGameReceived = false;
 
     private enum State {
         LOGGED_OUT,
@@ -86,6 +87,7 @@ public class Client implements ServerMessageObserver {
         else if (state == State.GAMEPLAY_WHITE || state == State.GAMEPLAY_BLACK) {
              switch (input) {
                 case "redraw" -> redrawGameplay();
+                case "leave" -> leave();
                 case "highlight" -> highlight();
                 default -> helpGameplay();
             }
@@ -93,6 +95,7 @@ public class Client implements ServerMessageObserver {
         else if (state == State.OBSERVE) {
             switch (input) {
                 case "redraw" -> redrawObserve();
+                case "leave" -> leave();
                 case "highlight" -> highlight();
                 default -> helpObserve();
             }
@@ -268,6 +271,7 @@ public class Client implements ServerMessageObserver {
             waitForLoadGame();
             System.out.println("Successfully joined the game.");
             helpGameplay();
+            gameID = gameIDMap.get(gameNumber);
         }
         catch (ResponseException e) {
             state = State.LOGGED_IN;
@@ -305,6 +309,7 @@ public class Client implements ServerMessageObserver {
             waitForLoadGame();
             System.out.println("Successfully joined the game as observer.");
             helpObserve();
+            gameID = gameIDMap.get(gameNumber);
         }
         catch (ResponseException e) {
             state = State.LOGGED_IN;
@@ -371,6 +376,19 @@ public class Client implements ServerMessageObserver {
         new ChessBoard().printBoard(game, state.equals(State.GAMEPLAY_WHITE));
     }
 
+    private void leave() {
+        try {
+            facade.leave(authToken, gameID);
+            game = null;
+            gameID = 0;
+            state = State.LOGGED_IN;
+            helpLoggedIn();
+        }
+        catch (ResponseException e) {
+            System.out.println("Failed to leave game.");
+        }
+    }
+
     private void highlight() {
         System.out.print("\nEnter position to highlight legal moves on >>> ");
         try {
@@ -407,9 +425,9 @@ public class Client implements ServerMessageObserver {
     }
 
     private void waitForLoadGame() throws ResponseException {
-        loadGameRecieved = false;
+        loadGameReceived = false;
         int totalWaitTime = 0;
-        while (!loadGameRecieved && totalWaitTime < 1000) {
+        while (!loadGameReceived && totalWaitTime < 1000) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -417,7 +435,7 @@ public class Client implements ServerMessageObserver {
             }
             totalWaitTime += 100;
         }
-        if (!loadGameRecieved) {
+        if (!loadGameReceived) {
             throw new ResponseException("Error: Request timed out", 408);
         }
     }
@@ -425,15 +443,15 @@ public class Client implements ServerMessageObserver {
     private void loadGame(ChessGame game) {
         this.game = game;
         new ChessBoard().printBoard(game, !state.equals(State.GAMEPLAY_BLACK));
-        loadGameRecieved = true;
+        loadGameReceived = true;
     }
 
     private void error(String errorMessage) {
-        System.out.println("Error: " + errorMessage);
+        System.out.println("\n" + errorMessage);
     }
 
     private void notification(String message) {
-        System.out.println(message);
+        System.out.println("\n" + message);
     }
 
     @Override
