@@ -8,16 +8,16 @@ import websocket.messages.ServerMessage;
 import websocket.messages.ServerMessageTypeAdapter;
 
 public class WebSocketSerializer {
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(UserGameCommand.class, new UserGameCommandTypeAdapter())
             .registerTypeAdapter(ServerMessage.class, new ServerMessageTypeAdapter())
             .create();
 
     public static <T> T deserialize(String json, Class<T> tClass) {
-        return gson.fromJson(json, tClass);
+        return GSON.fromJson(json, tClass);
     }
 
     public static String serialize(Object object) {
-        return gson.toJson(object);
+        return GSON.toJson(object);
     }
 }

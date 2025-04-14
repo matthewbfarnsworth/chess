@@ -66,7 +66,6 @@ public class Client implements ServerMessageObserver {
         while (!quit) {
             displayPrompt(">>> ");
             String line = getFirstString();
-
             eval(line);
         }
     }
@@ -113,13 +112,10 @@ public class Client implements ServerMessageObserver {
 
     private void login() {
         System.out.println("Logging in:");
-
         displayPrompt("Enter username >>> ");
         String username = getFirstString();
-
         displayPrompt("Enter password >>> ");
         String password = getFirstString();
-
         System.out.println();
         try {
             var result = facade.login(username, password);
@@ -139,10 +135,8 @@ public class Client implements ServerMessageObserver {
 
     private void register() {
         System.out.println("Registering new user:");
-
         displayPrompt("Enter username >>> ");
         String username = getFirstString();
-
         displayPrompt("Enter password >>> ");
         String password = getFirstString();
         displayPrompt("Confirm password >>> ");
@@ -151,10 +145,8 @@ public class Client implements ServerMessageObserver {
             System.out.println("Passwords do not match. Failed to register user.");
             return;
         }
-
         displayPrompt("Enter email >>> ");
         String email = getFirstString();
-
         System.out.println();
         try {
             var result = facade.register(username, password, email);
@@ -186,10 +178,8 @@ public class Client implements ServerMessageObserver {
 
     private void create() {
         System.out.println("Creating a new game:");
-
         displayPrompt("Enter game name >>> ");
         String gameName = getFullLine();
-
         System.out.println();
         try {
             facade.createGame(authToken, gameName);
@@ -214,7 +204,6 @@ public class Client implements ServerMessageObserver {
 
     private void list() {
         System.out.println("Listing games:\n");
-
         try {
             var games = facade.listGames(authToken).games();
             gameIDMap = mapNumbersToGameIDs(games);
@@ -248,7 +237,6 @@ public class Client implements ServerMessageObserver {
 
     private void join() {
         System.out.println("Joining a game:");
-
         displayPrompt("Enter game number >>> ");
         String gameNumberString = getFirstString();
         int gameNumber;
@@ -263,14 +251,12 @@ public class Client implements ServerMessageObserver {
             System.out.println("Invalid game number. Failed to join game.");
             return;
         }
-
         displayPrompt("Select player color (white/black) >>> ");
         String color = getFirstString();
         if (!color.equals("white") && !color.equals("black")) {
             System.out.println("Invalid color. Failed to join game.");
             return;
         }
-
         System.out.println();
         try {
             color = color.equals("white") ? "WHITE" : "BLACK";
@@ -294,7 +280,6 @@ public class Client implements ServerMessageObserver {
 
     private void observe() {
         System.out.println("Observing a game:");
-
         displayPrompt("Enter game number >>> ");
         String gameNumberString = getFirstString();
         int gameNumber;
@@ -310,7 +295,6 @@ public class Client implements ServerMessageObserver {
             return;
         }
         System.out.println();
-
         try {
             state = State.OBSERVE;
             facade.connect(authToken, gameIDMap.get(gameNumber));
@@ -326,7 +310,6 @@ public class Client implements ServerMessageObserver {
 
     private void logout() {
         System.out.println("Logging out:\n");
-
         try {
             facade.logout(authToken);
             authToken = null;
@@ -412,7 +395,6 @@ public class Client implements ServerMessageObserver {
             ChessPosition startPosition = stringToChessPosition(getFirstString());
             displayPrompt("Enter position to move to >>> ");
             ChessPosition endPosition = stringToChessPosition(getFirstString());
-
             ChessPiece.PieceType promotionPiece = null;
             ChessPiece currentPiece = game.getBoard().getPiece(startPosition);
             if (currentPiece != null && currentPiece.getPieceType() == ChessPiece.PieceType.PAWN &&
@@ -420,7 +402,6 @@ public class Client implements ServerMessageObserver {
                 displayPrompt("Enter promotion type piece (bishop, knight, queen, rook) >>> ");
                 promotionPiece = stringToPromotionPieceType(getFirstString());
             }
-
             facade.makeMove(authToken, gameID, new ChessMove(startPosition, endPosition, promotionPiece));
         }
         catch (InvalidInputException e) {
