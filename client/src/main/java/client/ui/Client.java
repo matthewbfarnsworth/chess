@@ -1,6 +1,8 @@
 package client.ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import client.net.ResponseException;
 import client.net.ServerFacade;
@@ -26,7 +28,7 @@ public class Client implements ServerMessageObserver {
     private Map<Integer, Integer> gameIDMap;
     private ChessGame game;
     private int gameID;
-    private boolean loadGameReceived = false;
+    private String previousPrompt = "";
 
     private enum State {
         LOGGED_OUT,
@@ -51,13 +53,18 @@ public class Client implements ServerMessageObserver {
         return new Scanner(System.in).nextLine();
     }
 
+    private void displayPrompt(String prompt) {
+        previousPrompt = prompt;
+        System.out.print("\n" + prompt);
+    }
+
     public void run() {
         System.out.println("CS 240 CHESS");
         System.out.println("Running on " + serverURL + "\n");
         helpLoggedOut();
 
         while (!quit) {
-            System.out.print("\n>>> ");
+            displayPrompt(">>> ");
             String line = getFirstString();
 
             eval(line);
@@ -88,6 +95,7 @@ public class Client implements ServerMessageObserver {
              switch (input) {
                 case "redraw" -> redrawGameplay();
                 case "leave" -> leave();
+                case "move" -> move();
                 case "highlight" -> highlight();
                 default -> helpGameplay();
             }
@@ -105,10 +113,10 @@ public class Client implements ServerMessageObserver {
     private void login() {
         System.out.println("Logging in:");
 
-        System.out.print("\nEnter username >>> ");
+        displayPrompt("Enter username >>> ");
         String username = getFirstString();
 
-        System.out.print("\nEnter password >>> ");
+        displayPrompt("Enter password >>> ");
         String password = getFirstString();
 
         System.out.println();
@@ -131,19 +139,19 @@ public class Client implements ServerMessageObserver {
     private void register() {
         System.out.println("Registering new user:");
 
-        System.out.print("\nEnter username >>> ");
+        displayPrompt("Enter username >>> ");
         String username = getFirstString();
 
-        System.out.print("\nEnter password >>> ");
+        displayPrompt("Enter password >>> ");
         String password = getFirstString();
-        System.out.print("\nConfirm password >>> ");
+        displayPrompt("Confirm password >>> ");
         String confirmedPassword = getFirstString();
         if (!confirmedPassword.equals(password)) {
             System.out.println("Passwords do not match. Failed to register user.");
             return;
         }
 
-        System.out.print("\nEnter email >>> ");
+        displayPrompt("Enter email >>> ");
         String email = getFirstString();
 
         System.out.println();
@@ -178,7 +186,7 @@ public class Client implements ServerMessageObserver {
     private void create() {
         System.out.println("Creating a new game:");
 
-        System.out.print("\nEnter game name >>> ");
+        displayPrompt("Enter game name >>> ");
         String gameName = getFullLine();
 
         System.out.println();
@@ -240,7 +248,7 @@ public class Client implements ServerMessageObserver {
     private void join() {
         System.out.println("Joining a game:");
 
-        System.out.print("\nEnter game number >>> ");
+        displayPrompt("Enter game number >>> ");
         String gameNumberString = getFirstString();
         int gameNumber;
         try {
@@ -255,7 +263,7 @@ public class Client implements ServerMessageObserver {
             return;
         }
 
-        System.out.print("\nSelect player color (white/black) >>> ");
+        displayPrompt("Select player color (white/black) >>> ");
         String color = getFirstString();
         if (!color.equals("white") && !color.equals("black")) {
             System.out.println("Invalid color. Failed to join game.");
@@ -268,7 +276,6 @@ public class Client implements ServerMessageObserver {
             state = color.equals("WHITE") ? State.GAMEPLAY_WHITE : State.GAMEPLAY_BLACK;
             facade.joinGame(authToken, color, gameIDMap.get(gameNumber));
             facade.connect(authToken, gameIDMap.get(gameNumber));
-            waitForLoadGame();
             System.out.println("Successfully joined the game.");
             helpGameplay();
             gameID = gameIDMap.get(gameNumber);
@@ -287,7 +294,7 @@ public class Client implements ServerMessageObserver {
     private void observe() {
         System.out.println("Observing a game:");
 
-        System.out.print("\nEnter game number >>> ");
+        displayPrompt("Enter game number >>> ");
         String gameNumberString = getFirstString();
         int gameNumber;
         try {
@@ -306,7 +313,6 @@ public class Client implements ServerMessageObserver {
         try {
             state = State.OBSERVE;
             facade.connect(authToken, gameIDMap.get(gameNumber));
-            waitForLoadGame();
             System.out.println("Successfully joined the game as observer.");
             helpObserve();
             gameID = gameIDMap.get(gameNumber);
@@ -357,19 +363,29 @@ public class Client implements ServerMessageObserver {
                 -> help""");
     }
 
-    private ChessPosition stringToChessPosition(String input) throws InvalidPositionException {
+    private ChessPosition stringToChessPosition(String input) throws InvalidInputException {
         if (input.length() != 2) {
-            throw new InvalidPositionException("Invalid position.");
+            throw new InvalidInputException("Invalid position.");
         }
         char firstChar = input.charAt(0);
         if (firstChar < 'a' || firstChar > 'h') {
-            throw new InvalidPositionException("Invalid position.");
+            throw new InvalidInputException("Invalid position.");
         }
         char secondChar = input.charAt(1);
         if (secondChar < '1' || secondChar > '8') {
-            throw new InvalidPositionException("Invalid position.");
+            throw new InvalidInputException("Invalid position.");
         }
         return new ChessPosition(Character.getNumericValue(secondChar), firstChar - 'a' + 1);
+    }
+
+    private ChessPiece.PieceType stringToPromotionPieceType(String input) throws InvalidInputException {
+        return switch(input) {
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            default -> throw new InvalidInputException("Invalid promotion piece.");
+        };
     }
 
     private void redrawGameplay() {
@@ -389,13 +405,38 @@ public class Client implements ServerMessageObserver {
         }
     }
 
+    private void move() {
+        displayPrompt("Enter position to move from >>> ");
+        try {
+            ChessPosition startPosition = stringToChessPosition(getFirstString());
+            displayPrompt("Enter position to move to >>> ");
+            ChessPosition endPosition = stringToChessPosition(getFirstString());
+
+            ChessPiece.PieceType promotionPiece = null;
+            ChessPiece currentPiece = game.getBoard().getPiece(startPosition);
+            if (currentPiece != null && currentPiece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                    (endPosition.getRow() == 1 || endPosition.getRow() == 8)) {
+                displayPrompt("Enter promotion type piece (bishop, knight, queen, rook) >>> ");
+                promotionPiece = stringToPromotionPieceType(getFirstString());
+            }
+
+            facade.makeMove(authToken, gameID, new ChessMove(startPosition, endPosition, promotionPiece));
+        }
+        catch (InvalidInputException e) {
+            System.out.println(e.getMessage());
+        }
+        catch (ResponseException e) {
+            redrawGameplay();
+        }
+    }
+
     private void highlight() {
-        System.out.print("\nEnter position to highlight legal moves on >>> ");
+        displayPrompt("Enter position to highlight legal moves on >>> ");
         try {
             ChessPosition highlightPosition = stringToChessPosition(getFirstString());
-            new ChessBoard().printBoard(new ChessGame(), highlightPosition, !state.equals(State.GAMEPLAY_BLACK));
+            new ChessBoard().printBoard(game, highlightPosition, !state.equals(State.GAMEPLAY_BLACK));
         }
-        catch (InvalidPositionException e) {
+        catch (InvalidInputException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -424,26 +465,9 @@ public class Client implements ServerMessageObserver {
                 """);
     }
 
-    private void waitForLoadGame() throws ResponseException {
-        loadGameReceived = false;
-        int totalWaitTime = 0;
-        while (!loadGameReceived && totalWaitTime < 1000) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new ResponseException(e.getMessage(), 500);
-            }
-            totalWaitTime += 100;
-        }
-        if (!loadGameReceived) {
-            throw new ResponseException("Error: Request timed out", 408);
-        }
-    }
-
     private void loadGame(ChessGame game) {
         this.game = game;
         new ChessBoard().printBoard(game, !state.equals(State.GAMEPLAY_BLACK));
-        loadGameReceived = true;
     }
 
     private void error(String errorMessage) {
@@ -456,10 +480,12 @@ public class Client implements ServerMessageObserver {
 
     @Override
     public void notify(ServerMessage message) {
+        System.out.println();
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> loadGame(((LoadGameServerMessage) message).getGame());
             case ERROR -> error(((ErrorServerMessage) message).getErrorMessage());
             case NOTIFICATION -> notification(((NotificationMessage) message).getMessage());
         }
+        System.out.print(previousPrompt);
     }
 }
