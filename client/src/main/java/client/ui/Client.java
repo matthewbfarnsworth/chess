@@ -96,6 +96,7 @@ public class Client implements ServerMessageObserver {
                 case "redraw" -> redrawGameplay();
                 case "leave" -> leave();
                 case "move" -> move();
+                case "resign" -> resign();
                 case "highlight" -> highlight();
                 default -> helpGameplay();
             }
@@ -427,6 +428,17 @@ public class Client implements ServerMessageObserver {
         }
         catch (ResponseException e) {
             redrawGameplay();
+        }
+    }
+
+    private void resign() {
+        displayPrompt("Are you sure you want to resign? (y/n) >>> ");
+        String resignConfirmation = getFirstString();
+        if (resignConfirmation.equals("y")) {
+            facade.resign(authToken, gameID);
+        }
+        else {
+            System.out.println("Game was not resigned.");
         }
     }
 
