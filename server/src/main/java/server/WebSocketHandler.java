@@ -211,7 +211,8 @@ public class WebSocketHandler {
         }
 
         ChessGame.TeamColor nextTeamTurn = updatedGame.getTeamTurn();
-        String nextTeamName = nextTeamTurn == ChessGame.TeamColor.WHITE ? "white" : "black";
+        String nextTeamName = (nextTeamTurn == ChessGame.TeamColor.WHITE) ?
+                gameData.whiteUsername() : gameData.blackUsername();
         if (updatedGame.isInStalemate(nextTeamTurn)) {
             setGameOver(gameID);
             notify(gameID, nextTeamName + " is in stalemate");
